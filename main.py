@@ -3,7 +3,7 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import HelloWorld
+from src.service import Signup
 from dotenv import load_dotenv
 from src.repo.user import User
 
@@ -31,7 +31,6 @@ dynamodb_client = boto3.client(
 # session = boto3.Session(profile_name='<your-aws-config-profile-name-here>')
 # dynamodb_client = session.client('dynamodb')
 
-
 app = Flask(__name__)
 api = Api(app)
 
@@ -52,11 +51,8 @@ def init_repo():
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
     # pprint.pprint(response)
 
-    api.add_resource(HelloWorld, '/', resource_class_kwargs={'repo': user_db})
+    api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
 
-
-#
-# api.add_resource(HelloWorld, '/', resource_class_kwargs={'repo': user_db})
 
 if __name__ == '__main__':
     init_repo()

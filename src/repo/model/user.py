@@ -1,4 +1,5 @@
 import uuid
+from pkg import InvalidArgumentError
 
 
 class User:
@@ -9,16 +10,22 @@ class User:
 
     def validate(self):
         if self.id == '':
-            raise ValueError('invalid id')
+            raise InvalidArgumentError('invalid id')
 
         if self.username == '':
-            raise ValueError('username cannot be empty')
+            raise InvalidArgumentError('username cannot be empty')
 
         if self.password == '':
-            raise ValueError('password cannot be empty')
+            raise InvalidArgumentError('password cannot be empty')
 
         if len(self.password) <= 8:
-            raise ValueError('password must be longer than 8 characters')
+            raise InvalidArgumentError('password must be longer than 8 characters')
 
-    def toString(self):
+    def get_username(self) -> str:
+        return self.username
+
+    def get_password(self) -> str:
+        return self.password
+
+    def toString(self) -> str:
         return str(self.id) + "\n" + self.username + "\n" + self.password
