@@ -2,7 +2,7 @@ import hashlib
 import bcrypt
 from botocore.exceptions import ClientError
 import logging
-from pkg import InternalError
+from pkg import InternalError, NotUniqueError
 from src.repo.model.user import User as UserModel
 
 logger = logging.getLogger(__name__)
@@ -76,6 +76,7 @@ class User:
                     'hash': password_hash,
                     'salt': salt,
                 },
+                ConditionExpression="attribute_not_exists(username)",
                 ReturnValues='NONE'
             )
         # TODO jansen: add error handling for duplicate, add proper logging, and response
@@ -83,6 +84,8 @@ class User:
             logger.error(
                 "Couldn't create item. Here's why: %s: %s",
                 err.response['Error']['Code'], err.response['Error']['Message'])
+            if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                raise NotUniqueError('Not unique')
             raise InternalError
         else:
             return

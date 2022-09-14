@@ -4,3 +4,7 @@ class InvalidArgumentError(Exception):
 
 class InternalError(Exception):
     pass
+
+
+class NotUniqueError(Exception):
+    pass

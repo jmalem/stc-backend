@@ -1,1 +1,1 @@
-from .error import InvalidArgumentError, InternalError
+from .error import InvalidArgumentError, InternalError, NotUniqueError
