@@ -54,6 +54,10 @@ class User:
 
     # List Tables
     def list_tables(self):
+        """
+        Lists the Amazon DynamoDB tables for the current account.
+        :return: The list of tables.
+        """
         try:
             tables = []
             for table in self.dyn_resource.tables.all():
@@ -66,13 +70,13 @@ class User:
         else:
             return tables
 
-    def create(self, usr: UserModel):
+    def create(self, user: UserModel):
         try:
             salt = bcrypt.gensalt()
-            password_hash = User.hash_password(usr.get_password(), salt)
+            password_hash = User.hash_password(user.get_password(), salt)
             self.table.put_item(
                 Item={
-                    'username': usr.get_username(),
+                    'username': user.get_username(),
                     'hash': password_hash,
                     'salt': salt,
                 },
