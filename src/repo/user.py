@@ -1,5 +1,9 @@
+import hashlib
+import bcrypt
 from botocore.exceptions import ClientError
 import logging
+from pkg import InternalError, NotUniqueError
+from src.repo.model.user import User as UserModel
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +52,7 @@ class User:
         else:
             return self.table
 
+    # List Tables
     def list_tables(self):
         """
         Lists the Amazon DynamoDB tables for the current account.
@@ -64,3 +69,32 @@ class User:
             raise
         else:
             return tables
+
+    def create(self, user: UserModel):
+        try:
+            salt = bcrypt.gensalt()
+            password_hash = User.hash_password(user.get_password(), salt)
+            self.table.put_item(
+                Item={
+                    'username': user.get_username(),
+                    'hash': password_hash,
+                    'salt': salt,
+                },
+                ConditionExpression="attribute_not_exists(username)",
+                ReturnValues='NONE'
+            )
+        # TODO jansen: add error handling for duplicate, add proper logging, and response
+        except ClientError as err:
+            logger.error(
+                "Couldn't create item. Here's why: %s: %s",
+                err.response['Error']['Code'], err.response['Error']['Message'])
+            if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                raise NotUniqueError('Not unique')
+            raise InternalError
+        else:
+            return
+
+    @staticmethod
+    def hash_password(password: str, salt: str) -> str:
+        combined = str(password) + str(salt)
+        return hashlib.sha512(combined.encode("utf-8")).hexdigest()
