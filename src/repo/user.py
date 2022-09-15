@@ -2,8 +2,8 @@ import hashlib
 import bcrypt
 from botocore.exceptions import ClientError
 import logging
-from pkg import \
-    InternalError, NotUniqueError, BadRequestError, \
+from utils import \
+    InternalError, NotUniqueError, UnauthenticatedError, \
     hash_password, verify_password, \
     create_jwt, generate_payload
 from src.repo.model.user import User as UserModel
@@ -106,12 +106,12 @@ class User:
             )
             data = response.get('Item')
             if data is None:
-                raise BadRequestError('invalid username/password')
+                raise UnauthenticatedError('invalid username/password')
 
             if verify_password(user.get_password(), str(bytes(data['salt'])), data['hash']):
                 payload = generate_payload(user.get_username())
                 return create_jwt(payload)
 
-            raise BadRequestError('invalid username/password')
+            raise UnauthenticatedError('invalid username/password')
         except ClientError as e:
             raise InternalError

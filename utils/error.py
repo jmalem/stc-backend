@@ -1,6 +1,7 @@
 class InvalidArgumentError(Exception):
     pass
 
+
 class BadRequestError(Exception):
     pass
 

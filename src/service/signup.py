@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request, abort, jsonify, make_response
 from ..repo.view import user as view
-from pkg import InvalidArgumentError, NotUniqueError
+from utils import InvalidArgumentError, NotUniqueError
 import logging
 
 

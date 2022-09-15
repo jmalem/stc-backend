@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request, abort, jsonify, make_response
 from ..repo.view import user as view
-from pkg import InvalidArgumentError, BadRequestError, InternalError
+from utils import InvalidArgumentError, UnauthenticatedError, InternalError
 import logging
 
 
@@ -26,9 +26,9 @@ class Login(Resource):
                     'token': token
                 }
             }), 200)
-        except BadRequestError as e:
+        except UnauthenticatedError as e:
             logging.error('Failed to login ', e)
-            abort(400, e)
+            abort(401, e)
         except InvalidArgumentError as e:
             logging.error('Failed to login ', e)
             abort(400, e)

@@ -1,6 +1,6 @@
 import jwt
-from .error import UnauthenticatedError
-from .constant import ENTITY_STC, ENTITY_STC_BACKEND
+from utils.error import UnauthenticatedError
+from utils.jwt.constant import ENTITY_STC, ENTITY_STC_BACKEND
 from datetime import datetime, timezone, timedelta
 import os
 
