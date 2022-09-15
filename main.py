@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from src.service import Signup
+from src.service import Login
 from dotenv import load_dotenv
 from src.repo.user import User
 
@@ -52,6 +53,7 @@ def init_repo():
     # pprint.pprint(response)
 
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
+    api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
 
 
 if __name__ == '__main__':
