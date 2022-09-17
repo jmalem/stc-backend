@@ -21,6 +21,7 @@ Create `.env` file with aws credentials
 AWS_ACCESS_KEY_ID="hello"
 AWS_SECRET_ACCESS_KEY="world"
 AWS_TABLE_REGION="ap-southeast-2"
+SECRET_KEY="magic"
 ```
 Alternatively, we can import the aws credentials in your `~/.aws/credentials`
 by changing this code

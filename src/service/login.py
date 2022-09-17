@@ -1,11 +1,11 @@
 from flask_restful import Resource
 from flask import request, abort, jsonify, make_response
 from ..repo.view import user as view
-from utils import InvalidArgumentError, NotUniqueError
+from utils import InvalidArgumentError, UnauthenticatedError, InternalError
 import logging
 
 
-class Signup(Resource):
+class Login(Resource):
     def __init__(self, repo):
         self.repo = repo
 
@@ -18,17 +18,20 @@ class Signup(Resource):
             usr = view.from_req_2_model(data)
             usr.validate()
 
-            self.repo.create(usr)
+            token = self.repo.login(usr)
 
             return make_response(jsonify({
                 'success': True,
                 'data': {
-                    'username': usr.get_username()
+                    'token': token
                 }
             }), 200)
-        except NotUniqueError as e:
-            logging.error('Failed to signup user ', e)
-            abort(400, e)
+        except UnauthenticatedError as e:
+            logging.error('Failed to login ', e)
+            abort(401, e)
         except InvalidArgumentError as e:
-            logging.error('Failed to signup user ', e)
+            logging.error('Failed to login ', e)
             abort(400, e)
+        except InternalError as e:
+            logging.error('Failed to login ', e)
+            abort(500, e)

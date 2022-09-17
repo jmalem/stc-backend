@@ -2,7 +2,10 @@ import hashlib
 import bcrypt
 from botocore.exceptions import ClientError
 import logging
-from pkg import InternalError, NotUniqueError
+from utils import \
+    InternalError, NotUniqueError, UnauthenticatedError, \
+    hash_password, verify_password, \
+    create_jwt, generate_payload
 from src.repo.model.user import User as UserModel
 
 logger = logging.getLogger(__name__)
@@ -73,7 +76,7 @@ class User:
     def create(self, user: UserModel):
         try:
             salt = bcrypt.gensalt()
-            password_hash = User.hash_password(user.get_password(), salt)
+            password_hash = hash_password(user.get_password(), salt)
             self.table.put_item(
                 Item={
                     'username': user.get_username(),
@@ -94,7 +97,21 @@ class User:
         else:
             return
 
-    @staticmethod
-    def hash_password(password: str, salt: str) -> str:
-        combined = str(password) + str(salt)
-        return hashlib.sha512(combined.encode("utf-8")).hexdigest()
+    def login(self, user: UserModel):
+        try:
+            response = self.table.get_item(
+                Key={
+                    'username': user.get_username()
+                }
+            )
+            data = response.get('Item')
+            if data is None:
+                raise UnauthenticatedError('invalid username/password')
+
+            if verify_password(user.get_password(), str(bytes(data['salt'])), data['hash']):
+                payload = generate_payload(user.get_username())
+                return create_jwt(payload)
+
+            raise UnauthenticatedError('invalid username/password')
+        except ClientError as e:
+            raise InternalError
