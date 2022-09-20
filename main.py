@@ -3,10 +3,10 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import Signup
-from src.service import Login
+from src.service import Signup, Login, Product
 from dotenv import load_dotenv
 from src.repo.user import User
+from src.repo.product import Product as ProductRepo
 
 load_dotenv()
 
@@ -48,12 +48,15 @@ def init_repo():
 
     print(user_db.list_tables())
 
+    product_db = ProductRepo()
+
     # Debugging DB instantiation - check region, capacity, etc
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
     # pprint.pprint(response)
 
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
+    api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db})
 
 
 if __name__ == '__main__':
