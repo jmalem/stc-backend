@@ -50,3 +50,10 @@ dont forget to update `requirements.txt` before you commit
 ```
 make lib.gen
 ```
+
+
+### Generate new csv
+Pass the mdb file to repo root and run
+```
+make data
+```

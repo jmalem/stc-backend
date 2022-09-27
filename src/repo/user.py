@@ -86,11 +86,7 @@ class User:
                 ConditionExpression="attribute_not_exists(username)",
                 ReturnValues='NONE'
             )
-        # TODO jansen: add error handling for duplicate, add proper logging, and response
         except ClientError as err:
-            logger.error(
-                "Couldn't create item. Here's why: %s: %s",
-                err.response['Error']['Code'], err.response['Error']['Message'])
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotUniqueError('Not unique')
             raise InternalError
