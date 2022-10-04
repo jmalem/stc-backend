@@ -53,7 +53,7 @@ make lib.gen
 
 
 ### Generate new csv
-Pass the mdb file to repo root and run
+Pass the mdb file to `/data` and run, the file has to be named `HS-toys.mdb`
 ```
 make data
 ```
