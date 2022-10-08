@@ -5,15 +5,24 @@ import logging
 from utils import InternalError
 from dotenv import load_dotenv
 import gdown
+import re
 
 # define const
 load_dotenv()
 PRODUCT_GDRIVE_URL = os.getenv('PRODUCT_GDRIVE_URL')
-
+CLOUDFRONT_BASE_URL = 'd2x2qav5m49n4.cloudfront.net/'
+IMAGE_JPG = '.jpg'
 OUTPUT_DIR = "data"
 
 # init logger
 logger = logging.getLogger(__name__)
+
+COL_LIST = ["NAMA_BRG", "ITEM_BRG", "PACKING", "HARGA", "Swatch_PRINT"]
+
+
+def extract_packing_and_unit(dt):
+    packing = dt.split(" ")
+    return packing[0], packing[-1]
 
 
 class Product:
@@ -37,7 +46,25 @@ class Product:
 
     def list(self):
         try:
-            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip').replace({np.nan:None})
+            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
+                replace({np.nan: None})
+
+            df.rename(columns={
+                'ITEM_BRG': 'itemCode',
+                'NAMA_BRG': 'title',
+                'Swatch_PRINT': 'imageUrl',
+            }, inplace=True)
+            # Extract price out of HARGA
+            df['price'] = df.apply(lambda x: re.sub("[^0-9]", "", str(x['HARGA'])), axis=1)
+
+            # Generates imageUrl in cloudfront (not always available)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['imageUrl']) + IMAGE_JPG, axis=1)
+
+            # Extract packing and unit from PACKING
+            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
+
+            # drop unwanted column
+            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
             tmp = df.to_dict(orient="records")
             return tmp
         except FileNotFoundError:
@@ -48,3 +75,4 @@ class Product:
             raise InternalError('Product list cannot be parsed')
         except Exception as e:
             raise InternalError('Failed to list', e)
+
