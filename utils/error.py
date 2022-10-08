@@ -14,5 +14,9 @@ class NotUniqueError(Exception):
     pass
 
 
+class NotFoundError(Exception):
+    pass
+
+
 class UnauthenticatedError(Exception):
     pass

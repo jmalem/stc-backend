@@ -56,8 +56,8 @@ def init_repo():
 
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
-    api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db})
-    api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db})
+    api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
+    api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
 
 
 if __name__ == '__main__':
