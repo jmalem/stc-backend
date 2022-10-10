@@ -3,7 +3,7 @@ import bcrypt
 from botocore.exceptions import ClientError
 import logging
 from utils import \
-    InternalError, NotUniqueError, UnauthenticatedError, \
+    InternalError, NotUniqueError, UnauthenticatedError, NotFoundError, \
     hash_password, verify_password, \
     create_jwt, generate_payload
 from src.repo.model.user import User as UserModel
@@ -92,6 +92,20 @@ class User:
             raise InternalError
         else:
             return
+
+    def get(self, username):
+        try:
+            response = self.table.get_item(
+                Key={
+                    'username': username,
+                },
+            )
+        except ClientError as err:
+            if err.response['Error']['Code'] == 'ResourceNotFoundException':
+                raise NotFoundError('Not found')
+            raise InternalError
+        else:
+            return response['Item']
 
     def login(self, user: UserModel):
         try:

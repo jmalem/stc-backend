@@ -1,13 +1,15 @@
 from flask_restful import Resource
 from flask import abort, jsonify, make_response
 import logging
-import pandas as pd
+from utils import token_required
 
 
 class Product(Resource):
-    def __init__(self, repo):
+    def __init__(self, repo, user_repo):
         self.repo = repo
+        self.user_repo = user_repo
 
+    @token_required
     def get(self):
         try:
             result = self.repo.list()
@@ -21,4 +23,3 @@ class Product(Resource):
         except Exception as e:
             logging.error('Failed to list product ', e)
             abort(500, e)
-

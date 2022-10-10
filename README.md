@@ -22,6 +22,15 @@ AWS_ACCESS_KEY_ID="hello"
 AWS_SECRET_ACCESS_KEY="world"
 AWS_TABLE_REGION="ap-southeast-2"
 SECRET_KEY="magic"
+
+# Google Drive folder URL
+PRODUCT_GDRIVE_URL="https://drive.google.com/drive/folders/1jsLoODAPeLNJNWzHhpe1KbQCOoujdcK3?usp=sharing"
+
+# HS-Toys.mdb table name that we will extract from
+PRODUCT_GDRIVE_TABLE_NAME="Swatch1"
+
+# if set to "1" will enable authentication, if not, will bypass JWT auth
+AUTH_ENABLED="1"
 ```
 Alternatively, we can import the aws credentials in your `~/.aws/credentials`
 by changing this code
