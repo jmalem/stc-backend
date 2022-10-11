@@ -17,7 +17,7 @@ OUTPUT_DIR = "data"
 # init logger
 logger = logging.getLogger(__name__)
 
-COL_LIST = ["NAMA_BRG", "ITEM_BRG", "PACKING", "HARGA", "Swatch_PRINT"]
+COL_LIST = ["NAMA_BRG", "ITEM_BRG", "PACKING", "HARGA", "PARTAI", "Swatch_PRINT"]
 
 
 def extract_packing_and_unit(dt):
@@ -50,15 +50,16 @@ class Product:
                 replace({np.nan: None})
 
             df.rename(columns={
-                'ITEM_BRG': 'itemCode',
+                'ITEM_BRG': 'displayId',
                 'NAMA_BRG': 'title',
-                'Swatch_PRINT': 'imageUrl',
+                'Swatch_PRINT': 'itemId',
+                'PARTAI': 'category',
             }, inplace=True)
             # Extract price out of HARGA
-            df['price'] = df.apply(lambda x: re.sub("[^0-9]", "", str(x['HARGA'])), axis=1)
+            df['unitPrice'] = df.apply(lambda x: re.sub("[^0-9]", "", str(x['HARGA'])), axis=1)
 
             # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['imageUrl']) + IMAGE_JPG, axis=1)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
 
             # Extract packing and unit from PACKING
             df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
