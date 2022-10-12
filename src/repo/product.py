@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import logging
-from utils import InternalError
+from utils import InternalError, NotFoundError
 from dotenv import load_dotenv
 import gdown
 import re
@@ -101,14 +101,9 @@ class Product:
 
             sort_by = flter.get(SORT_BY)
             if sort_by:
-                if sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.PRICE_ASC.value:
-                    df = df.sort_values(by="unitPrice")
-                elif sort_by == SortBy.PRICE_DESC.name or sort_by == SortBy.PRICE_DESC.value:
-                    df = df.sort_values(by="unitPrice", ascending=False)
-                elif sort_by == SortBy.NAME_ASC.name or sort_by == SortBy.NAME_ASC.value:
-                    df = df.sort_values(by="title")
-                elif sort_by == SortBy.NAME_DESC.name or sort_by == SortBy.NAME_DESC.value:
-                    df = df.sort_values(by="title", ascending=False)
+                sort_key = "unitPrice" if sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.PRICE_DESC.name else "title"
+                is_asc = sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.NAME_ASC.name
+                df = df.sort_values(by=sort_key, ascending=is_asc)
 
             tmp = df.to_dict(orient="records")
             return tmp
@@ -118,5 +113,45 @@ class Product:
             raise InternalError('Product list empty')
         except pd.errors.ParserError as e:
             raise InternalError('Product list cannot be parsed')
+        except Exception as e:
+            raise InternalError('Failed to list', e)
+
+    def get(self, item_id):
+        try:
+            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
+                replace({np.nan: None})
+
+            df.rename(columns={
+                'ITEM_BRG': 'displayId',
+                'NAMA_BRG': 'title',
+                'Swatch_PRINT': 'itemId',
+                'PARTAI': 'category',
+            }, inplace=True)
+            # Extract price out of HARGA
+            df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+
+            # Generates imageUrl in cloudfront (not always available)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
+
+            # Extract packing and unit from PACKING
+            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
+
+            # drop unwanted column
+            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
+
+            df = df.loc[df['itemId'] == item_id].head(1)
+            if len(df.index) == 0:
+                raise NotFoundError('item not found')
+
+            tmp = df.to_dict(orient="records")
+            return tmp
+        except FileNotFoundError:
+            raise InternalError('Product list cannot be built')
+        except pd.errors.EmptyDataError as e:
+            raise InternalError('Product list empty')
+        except pd.errors.ParserError as e:
+            raise InternalError('Product list cannot be parsed')
+        except NotFoundError as e:
+            raise e
         except Exception as e:
             raise InternalError('Failed to list', e)
