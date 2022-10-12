@@ -1,17 +1,14 @@
 import uuid
 from utils import InvalidArgumentError
+from marshmallow import Schema, fields
 
 
 class User:
     def __init__(self, username, password):
-        self.id = uuid.uuid4()
         self.username = username
         self.password = password
 
     def validate(self):
-        if self.id == '':
-            raise InvalidArgumentError('invalid id')
-
         if self.username == '':
             raise InvalidArgumentError('username cannot be empty')
 
@@ -28,4 +25,5 @@ class User:
         return self.password
 
     def toString(self) -> str:
-        return str(self.id) + "\n" + self.username + "\n" + self.password
+        return self.username + "\n" + self.password
+

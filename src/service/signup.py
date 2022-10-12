@@ -15,7 +15,7 @@ class Signup(Resource):
             if data is None:
                 raise InvalidArgumentError('Missing body')
 
-            usr = view.from_req_2_model(data)
+            usr = view.from_req_2_model_user(data)
             usr.validate()
 
             self.repo.create(usr)
