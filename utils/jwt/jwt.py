@@ -82,10 +82,10 @@ def token_required(f):
                        }, 401
         except Exception as e:
             return {
-                       "message": "Something went wrong",
+                       "message": "Unauthenticated",
                        "data": None,
                        "error": str(e)
-                   }, 500
+                   }, 401
 
         return f(*args, **kwargs)
 

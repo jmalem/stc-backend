@@ -49,6 +49,30 @@ class Product:
     def __init__(self):
         self.table = None
 
+        # init the csv
+        df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
+            replace({np.nan: None})
+
+        df.rename(columns={
+            'ITEM_BRG': 'displayId',
+            'NAMA_BRG': 'title',
+            'Swatch_PRINT': 'itemId',
+            'PARTAI': 'category',
+        }, inplace=True)
+        # Extract price out of HARGA
+        df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+
+        # Generates imageUrl in cloudfront (not always available)
+        df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
+
+        # Extract packing and unit from PACKING
+        df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
+
+        # drop unwanted column
+        df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
+
+        self.df = df
+
     def init(self):
         """
         Pull the specific GDrive directory that contains HS-toys.mdb
@@ -66,38 +90,21 @@ class Product:
 
     def list(self, flter):
         try:
-            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
-                replace({np.nan: None})
-
-            df.rename(columns={
-                'ITEM_BRG': 'displayId',
-                'NAMA_BRG': 'title',
-                'Swatch_PRINT': 'itemId',
-                'PARTAI': 'category',
-            }, inplace=True)
-            # Extract price out of HARGA
-            df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
-
-            # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
-
-            # Extract packing and unit from PACKING
-            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
-
-            # drop unwanted column
-            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
-
+            df = self.df
             # apply filter
             if type(flter) is not dict:
                 raise InternalError('Filter type error')
-
+            chain = None
             search = flter.get(SEARCH)
             if search:
-                df = df.loc[df['displayId'].str.contains(search, na=False)]
+                chain = df['displayId'].str.contains(search, na=False)
 
             category = flter.get(CATEGORY)
             if category:
-                df = df.loc[df['category'].str.contains(category, na=False)]
+                chain = chain & df['category'].str.contains(category, na=False)
+
+            if chain is not None:
+                df = df.loc[chain]
 
             sort_by = flter.get(SORT_BY)
             if sort_by:
@@ -118,28 +125,8 @@ class Product:
 
     def get(self, item_id):
         try:
-            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
-                replace({np.nan: None})
 
-            df.rename(columns={
-                'ITEM_BRG': 'displayId',
-                'NAMA_BRG': 'title',
-                'Swatch_PRINT': 'itemId',
-                'PARTAI': 'category',
-            }, inplace=True)
-            # Extract price out of HARGA
-            df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
-
-            # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
-
-            # Extract packing and unit from PACKING
-            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
-
-            # drop unwanted column
-            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
-
-            df = df.loc[df['itemId'] == item_id].head(1)
+            df = self.df.loc[self.df['itemId'] == item_id].head(1)
             if len(df.index) == 0:
                 raise NotFoundError('item not found')
 
