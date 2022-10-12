@@ -3,9 +3,10 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import Signup, Login, Product, ProductBuild
+from src.service import Signup, Login, Product, ProductBuild, Order as OrderSvc
 from dotenv import load_dotenv
 from src.repo.user import User
+from src.repo.order import Order
 from src.repo.product import Product as ProductRepo
 
 load_dotenv()
@@ -15,6 +16,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_TABLE_REGION = os.getenv('AWS_TABLE_REGION')
 
 USER_DB_NAME = "stc-user"
+ORDER_DB_NAME = "stc-order"
 
 # TODO: create .env file with your credentials
 session = boto3.Session(
@@ -46,7 +48,14 @@ def init_repo():
         user_db.create_table(USER_DB_NAME)
         print(f"\nCreated table {user_db.table.name}.")
 
-    print(user_db.list_tables())
+    order_db = Order(dynamodb)
+    order_db_exists = order_db.exists(ORDER_DB_NAME)
+    if not order_db_exists:
+        print(f"\nCreating table {ORDER_DB_NAME}...")
+        order_db.create_table(ORDER_DB_NAME)
+        print(f"\nCreated table {order_db.table.name}.")
+
+    print(order_db.list_tables())
 
     product_db = ProductRepo()
 
@@ -58,6 +67,7 @@ def init_repo():
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
     api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
+    api.add_resource(OrderSvc, '/order', resource_class_kwargs={'repo': order_db, 'user_repo': user_db})
 
 
 if __name__ == '__main__':

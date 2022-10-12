@@ -1,37 +1,40 @@
+import json
+
 from flask_restful import Resource
-from flask import request, abort, jsonify, make_response
-from ..repo.view import user as view
+from flask import abort, jsonify, make_response, request
 from utils import InvalidArgumentError, UnauthenticatedError, InternalError
 import logging
+from utils import token_required
+from ..repo.view import order as view
 
 
-class Login(Resource):
-    def __init__(self, repo):
+class Order(Resource):
+    def __init__(self, repo, user_repo):
         self.repo = repo
+        self.user_repo = user_repo
 
+    @token_required
     def post(self):
         try:
             data = request.get_json(force=True)
             if data is None:
                 raise InvalidArgumentError('Missing body')
 
-            usr = view.from_req_2_model_user(data)
-            usr.validate()
+            order = view.from_req_2_model_order(data)
+            order.validate()
 
-            token = self.repo.login(usr)
+            result = self.repo.create(order)
 
             return make_response(jsonify({
                 'success': True,
-                'data': {
-                    'token': token
-                }
+                'data': result
             }), 200)
         except UnauthenticatedError as e:
-            logging.error('Failed to login ', e)
+            logging.error('Failed to create order ', e)
             abort(401, e)
         except InvalidArgumentError as e:
-            logging.error('Failed to login ', e)
+            logging.error('Failed to create order ', e)
             abort(400, e)
         except InternalError as e:
-            logging.error('Failed to login ', e)
+            logging.error('Failed to create order ', e)
             abort(500, e)
