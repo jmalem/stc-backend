@@ -3,7 +3,7 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import Signup, Login, Product, ProductBuild, Order as OrderSvc
+from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc
 from dotenv import load_dotenv
 from src.repo.user import User
 from src.repo.order import Order
@@ -66,6 +66,7 @@ def init_repo():
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
     api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
+    api.add_resource(ProductDetail, '/product/<item_id>', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(OrderSvc, '/order', resource_class_kwargs={'repo': order_db, 'user_repo': user_db})
 

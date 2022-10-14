@@ -13,11 +13,9 @@ def from_req_2_model_order(dt):
 
 
 def from_req_2_model_order_item_array(arr):
-    print('HEEE', type(arr))
     if len(arr) == 0:
         return []
     new_arr = list(map(from_req_2_model_order_item, arr))
-    print('HEEE 1', str(new_arr))
     return new_arr
 
 

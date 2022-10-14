@@ -57,7 +57,7 @@ def token_required(f):
     """
 
     @wraps(f)
-    def decorated(*args):
+    def decorated(*args, **kwargs):
         if AUTH_ENABLED != "1":
             return f(*args)
         token = None
@@ -82,11 +82,11 @@ def token_required(f):
                        }, 401
         except Exception as e:
             return {
-                       "message": "Something went wrong",
+                       "message": "Unauthenticated",
                        "data": None,
                        "error": str(e)
-                   }, 500
+                   }, 401
 
-        return f(*args)
+        return f(*args, **kwargs)
 
     return decorated

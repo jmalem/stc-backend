@@ -2,6 +2,7 @@ from flask_restful import Resource
 from flask import abort, jsonify, make_response
 import logging
 from utils import token_required
+from src.repo.product import Product as ProductRepo
 
 
 class ProductBuild(Resource):
@@ -17,7 +18,11 @@ class ProductBuild(Resource):
             # convert to csv
             self.repo.export_to_csv()
             # returns new lists
-            result = self.repo.list()
+            result = self.repo.list({})
+
+            # updates the repo with the new repo as csv file has been update
+            self.repo = ProductRepo()
+
             return make_response(jsonify({
                 'success': True,
                 'data': {
