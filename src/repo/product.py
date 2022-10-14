@@ -88,25 +88,25 @@ class Product:
     def export_to_csv(self):
         os.system('make data')
 
-    def list(self, flter):
+    def list(self, filters):
         try:
             df = self.df
             # apply filter
-            if type(flter) is not dict:
+            if type(filters) is not dict:
                 raise InternalError('Filter type error')
             chain = None
-            search = flter.get(SEARCH)
+            search = filters.get(SEARCH)
             if search:
                 chain = df['displayId'].str.contains(search, na=False)
 
-            category = flter.get(CATEGORY)
+            category = filters.get(CATEGORY)
             if category:
                 chain = chain & df['category'].str.contains(category, na=False)
 
             if chain is not None:
                 df = df.loc[chain]
 
-            sort_by = flter.get(SORT_BY)
+            sort_by = filters.get(SORT_BY)
             if sort_by:
                 sort_key = "unitPrice" if sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.PRICE_DESC.name else "title"
                 is_asc = sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.NAME_ASC.name
