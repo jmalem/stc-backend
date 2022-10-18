@@ -4,16 +4,16 @@ import numpy as np
 import logging
 from utils import InternalError, NotFoundError
 from dotenv import load_dotenv
-import gdown
 import re
 from enum import Enum
 
 # define const
 load_dotenv()
-PRODUCT_GDRIVE_URL = os.getenv('PRODUCT_GDRIVE_URL')
 CLOUDFRONT_BASE_URL = 'd2x2qav5m49n4.cloudfront.net/'
 IMAGE_JPG = '.jpg'
-OUTPUT_DIR = "data"
+S3_BUCKET_NAME = 'stc-repo-test'
+S3_KEY = 'HS-toys.mdb'
+OUTPUT_PATH = 'data/HS-toys.mdb'
 
 # init logger
 logger = logging.getLogger(__name__)
@@ -46,47 +46,47 @@ def getPrice(price):
 
 
 class Product:
-    def __init__(self):
+    def __init__(self, s3):
         self.table = None
-
-        # init the csv
-        df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
-            replace({np.nan: None})
-
-        df.rename(columns={
-            'ITEM_BRG': 'displayId',
-            'NAMA_BRG': 'title',
-            'Swatch_PRINT': 'itemId',
-            'PARTAI': 'category',
-        }, inplace=True)
-        # Extract price out of HARGA
-        df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
-
-        # Generates imageUrl in cloudfront (not always available)
-        df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
-
-        # Extract packing and unit from PACKING
-        df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
-
-        # drop unwanted column
-        df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
-
-        self.df = df
+        self.s3 = s3
 
     def init(self):
         """
-        Pull the specific GDrive directory that contains HS-toys.mdb
-
-        The reason why we download the folder
-        Setting permissions on folders are much easier than changing perms for individual files
-
-        with individual files, FE need to always pass the url/file id for the new uploaded .mdb file
+        Pull HS-toys.mdb from stc-repo-test bucket
         """
-        url = PRODUCT_GDRIVE_URL
-        gdown.download_folder(url=url, output=OUTPUT_DIR, quiet=False, use_cookies=False)
+        self.s3.meta.client.download_file(S3_BUCKET_NAME, S3_KEY, OUTPUT_PATH)
 
     def export_to_csv(self):
         os.system('make data')
+
+    def load_csv(self):
+        file_exists = os.path.exists('data/data.csv')
+        if file_exists:
+            # init the csv
+            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
+                replace({np.nan: None})
+
+            df.rename(columns={
+                'ITEM_BRG': 'displayId',
+                'NAMA_BRG': 'title',
+                'Swatch_PRINT': 'itemId',
+                'PARTAI': 'category',
+            }, inplace=True)
+            # Extract price out of HARGA
+            df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+
+            # Generates imageUrl in cloudfront (not always available)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
+
+            # Extract packing and unit from PACKING
+            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
+
+            # drop unwanted column
+            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
+
+            self.df = df
+        else:
+            raise InternalError('data not found')
 
     def list(self, filters):
         try:

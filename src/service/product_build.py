@@ -17,11 +17,10 @@ class ProductBuild(Resource):
             self.repo.init()
             # convert to csv
             self.repo.export_to_csv()
+            # load new csv
+            self.repo.load_csv()
             # returns new lists
             result = self.repo.list({})
-
-            # updates the repo with the new repo as csv file has been update
-            self.repo = ProductRepo()
 
             return make_response(jsonify({
                 'success': True,

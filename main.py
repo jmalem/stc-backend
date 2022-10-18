@@ -30,6 +30,7 @@ dynamodb_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_TABLE_REGION
 )
+
 # Alternative
 # session = boto3.Session(profile_name='<your-aws-config-profile-name-here>')
 # dynamodb_client = session.client('dynamodb')
@@ -57,7 +58,9 @@ def init_repo():
 
     print(order_db.list_tables())
 
-    product_db = ProductRepo()
+    # Init s3 session, and pass it to product repo
+    s3 = session.resource('s3')
+    product_db = ProductRepo(s3)
 
     # Debugging DB instantiation - check region, capacity, etc
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
