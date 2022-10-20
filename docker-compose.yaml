@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+    stc-backend:
+        build: .
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/app
+        environment:
+            - FLASK_APP=${FLASK_APP}
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            - AWS_TABLE_REGION=${AWS_TABLE_REGION}
+            - SECRET_KEY=${SECRET_KEY}
+            - PRODUCT_TABLE_NAME=${PRODUCT_TABLE_NAME}
+            - AUTH_ENABLED=${AUTH_ENABLED}

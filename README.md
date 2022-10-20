@@ -18,16 +18,14 @@ make lib.install
 ### AWS config
 Create `.env` file with aws credentials
 ```
+FLASK_APP="main.py" #This is a must have
 AWS_ACCESS_KEY_ID="hello"
 AWS_SECRET_ACCESS_KEY="world"
 AWS_TABLE_REGION="ap-southeast-2"
 SECRET_KEY="magic"
 
-# Google Drive folder URL
-PRODUCT_GDRIVE_URL="https://drive.google.com/drive/folders/1jsLoODAPeLNJNWzHhpe1KbQCOoujdcK3?usp=sharing"
-
 # HS-Toys.mdb table name that we will extract from
-PRODUCT_GDRIVE_TABLE_NAME="Swatch1"
+PRODUCT_TABLE_NAME="Swatch1"
 
 # if set to "1" will enable authentication, if not, will bypass JWT auth
 AUTH_ENABLED="1"
@@ -65,4 +63,17 @@ make lib.gen
 Pass the mdb file to `/data` and run, the file has to be named `HS-toys.mdb`
 ```
 make data
+```
+
+
+### Build docker image
+Build the docker image with docker compose (includes .env var)
+```
+make build
+```
+
+Build and run manually (this one does not include .env var)
+```
+docker build -t flask-docker:latest . 
+docker run -p 5000:5000 flask-docker  
 ```
