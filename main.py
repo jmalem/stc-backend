@@ -3,11 +3,12 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc
+from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc, Ping
 from dotenv import load_dotenv
 from src.repo.user import User
 from src.repo.order import Order
 from src.repo.product import Product as ProductRepo
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -36,6 +37,7 @@ dynamodb_client = boto3.client(
 # dynamodb_client = session.client('dynamodb')
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 
@@ -66,6 +68,7 @@ def init_repo():
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
     # pprint.pprint(response)
 
+    api.add_resource(Ping, '/ping')
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
     api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
@@ -76,4 +79,4 @@ def init_repo():
 
 if __name__ == '__main__':
     init_repo()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
