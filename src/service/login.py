@@ -16,7 +16,7 @@ class Login(Resource):
                 raise InvalidArgumentError('Missing body')
 
             usr = view.from_req_2_model_user(data)
-            usr.validate()
+            usr.validate_login()
 
             token = self.repo.login(usr)
 

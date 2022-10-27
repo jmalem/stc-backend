@@ -80,6 +80,7 @@ class User:
             self.table.put_item(
                 Item={
                     'username': user.get_username(),
+                    'fullname': user.get_fullname(),
                     'hash': password_hash,
                     'salt': salt,
                 },

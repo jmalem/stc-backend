@@ -23,7 +23,8 @@ class Signup(Resource):
             return make_response(jsonify({
                 'success': True,
                 'data': {
-                    'username': usr.get_username()
+                    'username': usr.get_username(),
+                    'fullname': usr.get_fullname()
                 }
             }), 200)
         except NotUniqueError as e:
