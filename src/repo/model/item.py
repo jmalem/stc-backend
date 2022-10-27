@@ -22,9 +22,6 @@ class Item:
         if self.title == '':
             raise InvalidArgumentError('invalid title')
 
-        if self.category == '':
-            raise InvalidArgumentError('invalid category')
-
         if self.display_id == '':
             raise InvalidArgumentError('invalid display_id')
 
