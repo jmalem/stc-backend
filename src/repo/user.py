@@ -124,7 +124,10 @@ class User:
 
             if verify_password(user.get_password(), str(bytes(data['salt'])), data['hash']):
                 payload = generate_payload(user.get_username())
-                return {token: create_jwt(payload), fullname: user.get_fullname()}
+                return {
+                    'token': create_jwt(payload),
+                    'fullname': data['fullname']
+                }
 
             raise UnauthenticatedError('invalid username/password')
         except ClientError as e:

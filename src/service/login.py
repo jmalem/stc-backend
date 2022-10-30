@@ -24,8 +24,8 @@ class Login(Resource):
                 'success': True,
                 'data': {
                     'username': usr.get_username(),
-                    'fullname': usrData.fullname,
-                    'token': usrData.token
+                    'fullname': usrData.get('fullname'),
+                    'token': usrData.get('token')
                 }
             }), 200)
         except UnauthenticatedError as e:
