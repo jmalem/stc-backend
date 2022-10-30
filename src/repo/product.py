@@ -98,11 +98,14 @@ class Product:
             chain = None
             search = filters.get(SEARCH)
             if search:
-                chain = df['displayId'].str.contains(search, na=False, case=False) | df['title'].str.contains(search, na=False, case=False)
+                chain = (df['displayId'].str.contains(search, na=False, case=False) | df['title'].str.contains(search, na=False, case=False))
 
             category = filters.get(CATEGORY)
             if category:
-                chain = chain & df['category'].str.contains(category, na=False, case=False)
+                if chain is None:
+                    chain = df['category'].str.contains(category, na=False, case=False)
+                else:
+                    chain = chain & df['category'].str.contains(category, na=False, case=False)
 
             if chain is not None:
                 df = df.loc[chain]
