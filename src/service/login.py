@@ -18,14 +18,14 @@ class Login(Resource):
             usr = view.from_req_2_model_user(data)
             usr.validate_login()
 
-            usrData = self.repo.login(usr)
+            usr_data = self.repo.login(usr)
 
             return make_response(jsonify({
                 'success': True,
                 'data': {
                     'username': usr.get_username(),
-                    'fullname': usrData.get('fullname'),
-                    'token': usrData.get('token')
+                    'fullname': usr_data.get('fullname'),
+                    'token': usr_data.get('token')
                 }
             }), 200)
         except UnauthenticatedError as e:
