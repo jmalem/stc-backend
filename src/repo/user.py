@@ -40,8 +40,10 @@ class User:
             self.table = self.dyn_resource.create_table(
                 TableName=table_name,
                 KeySchema=[
-                    {'AttributeName': 'username',
-                        'KeyType': 'HASH'},  # Partition key
+                    {
+                        'AttributeName': 'username',
+                        'KeyType': 'HASH'
+                    },  # Partition key
                 ],
                 AttributeDefinitions=[
                     {'AttributeName': 'username', 'AttributeType': 'S'},
