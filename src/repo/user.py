@@ -40,7 +40,10 @@ class User:
             self.table = self.dyn_resource.create_table(
                 TableName=table_name,
                 KeySchema=[
-                    {'AttributeName': 'username', 'KeyType': 'HASH'},  # Partition key
+                    {
+                        'AttributeName': 'username',
+                        'KeyType': 'HASH'
+                    },  # Partition key
                 ],
                 AttributeDefinitions=[
                     {'AttributeName': 'username', 'AttributeType': 'S'},
@@ -87,6 +90,8 @@ class User:
                 ConditionExpression="attribute_not_exists(username)",
                 ReturnValues='NONE'
             )
+            payload = generate_payload(user.get_username())
+            return create_jwt(payload)
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotUniqueError('Not unique')
@@ -121,7 +126,10 @@ class User:
 
             if verify_password(user.get_password(), str(bytes(data['salt'])), data['hash']):
                 payload = generate_payload(user.get_username())
-                return create_jwt(payload)
+                return {
+                    'token': create_jwt(payload),
+                    'fullname': data['fullname']
+                }
 
             raise UnauthenticatedError('invalid username/password')
         except ClientError as e:

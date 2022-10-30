@@ -18,13 +18,14 @@ class Signup(Resource):
             usr = view.from_req_2_model_user(data)
             usr.validate()
 
-            self.repo.create(usr)
+            token = self.repo.create(usr)
 
             return make_response(jsonify({
                 'success': True,
                 'data': {
                     'username': usr.get_username(),
-                    'fullname': usr.get_fullname()
+                    'fullname': usr.get_fullname(),
+                    'token': token
                 }
             }), 200)
         except NotUniqueError as e:
