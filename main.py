@@ -68,6 +68,21 @@ def init_repo():
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
     # pprint.pprint(response)
 
+    # Will download mdb and build product
+    try:
+        file_exists = os.path.exists('data/data.csv')
+        if not file_exists:
+            print("trying to download new mdb file..")
+            product_db.init()
+            print("converts mdb to csv file..")
+            product_db.export_to_csv()
+        print("loading csv file..")
+        product_db.load_csv()
+        print("csv loads successful")
+    except Exception as e:
+        print("warn: csv is corrupt or doesnt exist, will need to re-init product list")
+        pass
+
     api.add_resource(Ping, '/ping')
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})

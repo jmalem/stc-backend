@@ -9,7 +9,7 @@ from enum import Enum
 
 # define const
 load_dotenv()
-CLOUDFRONT_BASE_URL = 'd2x2qav5m49n4.cloudfront.net/'
+CLOUDFRONT_BASE_URL = 'https://d2x2qav5m49n4.cloudfront.net/'
 IMAGE_JPG = '.jpg'
 S3_BUCKET_NAME = 'stc-repo-test'
 S3_KEY = 'HS-toys.mdb'
@@ -49,6 +49,7 @@ class Product:
     def __init__(self, s3):
         self.table = None
         self.s3 = s3
+        self.df = None
 
     def init(self):
         """
@@ -97,11 +98,11 @@ class Product:
             chain = None
             search = filters.get(SEARCH)
             if search:
-                chain = df['displayId'].str.contains(search, na=False)
+                chain = df['displayId'].str.contains(search, na=False, case=False) | df['title'].str.contains(search, na=False, case=False)
 
             category = filters.get(CATEGORY)
             if category:
-                chain = chain & df['category'].str.contains(category, na=False)
+                chain = chain & df['category'].str.contains(category, na=False, case=False)
 
             if chain is not None:
                 df = df.loc[chain]
