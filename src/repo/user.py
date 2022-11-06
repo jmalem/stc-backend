@@ -84,6 +84,7 @@ class User:
                 Item={
                     'username': user.get_username(),
                     'fullname': user.get_fullname(),
+                    'role': user.get_role(),
                     'hash': password_hash,
                     'salt': salt,
                 },
@@ -128,7 +129,8 @@ class User:
                 payload = generate_payload(user.get_username())
                 return {
                     'token': create_jwt(payload),
-                    'fullname': data['fullname']
+                    'fullname': data['fullname'],
+                    'role': data['role']
                 }
 
             raise UnauthenticatedError('invalid username/password')

@@ -25,6 +25,7 @@ class Signup(Resource):
                 'data': {
                     'username': usr.get_username(),
                     'fullname': usr.get_fullname(),
+                    'role': usr.get_role(),
                     'token': token
                 }
             }), 200)
