@@ -3,11 +3,13 @@ import boto3
 import os
 from flask import Flask
 from flask_restful import Api
-from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc, Ping
+from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc, Ping, Customer, \
+    CustomerBuild
 from dotenv import load_dotenv
 from src.repo.user import User
 from src.repo.order import Order
 from src.repo.product import Product as ProductRepo
+from src.repo.customer import Customer as CustomerRepo
 from flask_cors import CORS
 
 load_dotenv()
@@ -64,6 +66,9 @@ def init_repo():
     s3 = session.resource('s3')
     product_db = ProductRepo(s3)
 
+    #
+    customer_db = CustomerRepo(s3)
+
     # Debugging DB instantiation - check region, capacity, etc
     # response = dynamodb_client.describe_table(TableName=USER_DB_NAME)
     # pprint.pprint(response)
@@ -76,20 +81,29 @@ def init_repo():
             product_db.init()
             print("converts mdb to csv file..")
             product_db.export_to_csv()
+        cust_file_exists = os.path.exists('data/customer.xlsx')
+        if not cust_file_exists:
+            print("trying to download new xlsx file..")
+            customer_db.init()
         print("loading csv file..")
         product_db.load_csv()
-        print("csv loads successful")
+        print("loading customer file..")
+        customer_db.load_customer()
+        print("data loads successful")
     except Exception as e:
-        print("warn: csv is corrupt or doesnt exist, will need to re-init product list")
+        print("warn: csv is corrupt or doesnt exist, will need to re-init product list", e)
         pass
 
     api.add_resource(Ping, '/ping')
     api.add_resource(Signup, '/signup', resource_class_kwargs={'repo': user_db})
     api.add_resource(Login, '/login', resource_class_kwargs={'repo': user_db})
     api.add_resource(Product, '/product', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
-    api.add_resource(ProductDetail, '/product/<item_id>', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
+    api.add_resource(ProductDetail, '/product/<item_id>',
+                     resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(OrderSvc, '/order', resource_class_kwargs={'repo': order_db, 'user_repo': user_db})
+    api.add_resource(Customer, '/customer', resource_class_kwargs={'repo': customer_db, 'user_repo': user_db})
+    api.add_resource(CustomerBuild, '/customer:build', resource_class_kwargs={'repo': customer_db, 'user_repo': user_db})
 
 
 if __name__ == '__main__':
