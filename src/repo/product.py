@@ -9,9 +9,8 @@ from enum import Enum
 
 # define const
 load_dotenv()
-CLOUDFRONT_BASE_URL = 'https://d2x2qav5m49n4.cloudfront.net/'
-IMAGE_JPG = '.jpg'
 S3_BUCKET_NAME = 'stc-repo-test'
+S3_IMAGE_BUCKET_NAME = 'stc-images-test'
 S3_KEY = 'HS-toys.mdb'
 OUTPUT_PATH = 'data/HS-toys.mdb'
 
@@ -50,6 +49,7 @@ class Product:
         self.table = None
         self.s3 = s3
         self.df = None
+        self.img_cache = dict()
 
     def init(self):
         """
@@ -75,9 +75,6 @@ class Product:
             }, inplace=True)
             # Extract price out of HARGA
             df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
-
-            # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
 
             # Extract packing and unit from PACKING
             df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
@@ -134,7 +131,28 @@ class Product:
             if len(df.index) == 0:
                 raise NotFoundError('item not found')
 
+            medias = self.img_cache.get(item_id, [])
+            if len(medias) == 0:
+                objs = self.s3.meta.client.list_objects_v2(
+                    Bucket=S3_IMAGE_BUCKET_NAME,
+                    Prefix=item_id,
+                    EncodingType='url',
+                    MaxKeys=5
+                )
+
+                contents = objs.get('Contents')
+                for c in contents:
+                    medias.append(c.get('Key'))
+                self.img_cache[item_id] = medias
+            else:
+                print('cache found for ', item_id)
+
             tmp = df.to_dict(orient="records")
+            # to_dict returns an array hence the [0]
+            # and we are doing it here since panda cannot handle multiple value in 1 cell
+            # we have to concat it into a string and split it again
+            # Hence it will be more performant to append it here
+            tmp[0]['mediaObjs'] = medias
             return tmp
         except FileNotFoundError:
             raise InternalError('Product list cannot be built')
