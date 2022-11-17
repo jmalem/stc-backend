@@ -38,3 +38,25 @@ class Order(Resource):
         except InternalError as e:
             logging.error('Failed to create order ', e)
             abort(500, e)
+
+    @token_required
+    def get(self):
+        try:
+            flter = request.args
+            result = self.repo.list_order_for_customer(flter.to_dict())
+
+            return make_response(jsonify({
+                'success': True,
+                'data': {
+                    'orders': result
+                }
+            }), 200)
+        except UnauthenticatedError as e:
+            logging.error('Failed to list orders ', e)
+            abort(401, e)
+        except InvalidArgumentError as e:
+            logging.error('Failed to list orders ', e)
+            abort(400, e)
+        except InternalError as e:
+            logging.error('Failed to list orders ', e)
+            abort(500, e)

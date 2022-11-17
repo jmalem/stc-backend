@@ -9,8 +9,8 @@ from enum import Enum
 
 # define const
 load_dotenv()
-S3_BUCKET_NAME = 'stc-repo-test'
-S3_IMAGE_BUCKET_NAME = 'stc-images-test'
+S3_BUCKET_NAME = 'stc-repo-prod'
+S3_IMAGE_BUCKET_NAME = 'stc-images-prod'
 S3_KEY = 'HS-toys.mdb'
 OUTPUT_PATH = 'data/HS-toys.mdb'
 
