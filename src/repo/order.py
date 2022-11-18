@@ -81,7 +81,6 @@ class Order:
     def create(self, order: OrderModel):
         try:
             order.created_at = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-            order.modified_at = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
             schema = OrderSchema()
             json_result = schema.dump(order)
@@ -111,14 +110,11 @@ class Order:
         else:
             return response['Item']
 
-    def list_order_for_customer(self, filters):
+    def list_orders(self, filters):
         try:
             if type(filters) is not dict:
                 raise InternalError('Filter type error')
             customer = filters.get(CUSTOMER, '')
-            if customer == '':
-                raise InvalidArgumentError('missing customer')
-
             before = filters.get(BEFORE, None)
             after = filters.get(AFTER, None)
             cond = None
@@ -132,15 +128,21 @@ class Order:
                 else:
                     cond = cond & Attr('created_at').lte(before)
 
-            if cond is not None:
+            cond_kwargs = {}
+            if cond:
+                cond_kwargs['FilterExpression'] = cond
+            # optimise using query when we have customer
+            if customer != "":
                 response = self.table.query(
                     KeyConditionExpression=Key('customer').eq(customer),
-                    FilterExpression=cond
+                    **cond_kwargs
                 )
+            # we have to scan when customer is not specified
             else:
-                response = self.table.query(
-                    KeyConditionExpression=Key('customer').eq(customer),
+                response = self.table.scan(
+                    **cond_kwargs
                 )
+
         except ClientError as err:
             if err.response['Error']['Code'] == 'ResourceNotFoundException':
                 raise NotFoundError('Not found')

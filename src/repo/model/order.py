@@ -15,7 +15,6 @@ class Order:
         self.order_items = order_items
         self.notes = notes
         self.created_at = created_at
-        self.modified_at = modified_at
 
     def validate(self):
         if self.id == '':
@@ -76,4 +75,3 @@ class OrderSchema(Schema):
     order_items = fields.List(fields.Nested(OrderItemSchema()))
     notes = fields.Str()
     created_at = fields.Str()
-    modified_at = fields.Str()

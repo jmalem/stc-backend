@@ -44,7 +44,7 @@ class Order(Resource):
     def get(self):
         try:
             flter = request.args
-            result = self.repo.list_order_for_customer(flter.to_dict())
+            result = self.repo.list_orders(flter.to_dict())
 
             return make_response(jsonify({
                 'success': True,
