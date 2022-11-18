@@ -91,7 +91,7 @@ class User:
                 ConditionExpression="attribute_not_exists(username)",
                 ReturnValues='NONE'
             )
-            payload = generate_payload(user.get_username())
+            payload = generate_payload(user.get_username(), user.get_role())
             return create_jwt(payload)
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
@@ -126,7 +126,7 @@ class User:
                 raise UnauthenticatedError('invalid username/password')
 
             if verify_password(user.get_password(), str(bytes(data['salt'])), data['hash']):
-                payload = generate_payload(user.get_username())
+                payload = generate_payload(user.get_username(), data.get('role'))
                 return {
                     'token': create_jwt(payload),
                     'fullname': data['fullname'],

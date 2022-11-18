@@ -2,7 +2,7 @@ import json
 
 from flask_restful import Resource
 from flask import abort, jsonify, make_response, request
-from utils import InvalidArgumentError, UnauthenticatedError, InternalError
+from utils import InvalidArgumentError, UnauthenticatedError, InternalError, admin_only
 import logging
 from utils import token_required
 from ..repo.view import order as view
@@ -40,6 +40,7 @@ class Order(Resource):
             abort(500, e)
 
     @token_required
+    @admin_only
     def get(self):
         try:
             flter = request.args
