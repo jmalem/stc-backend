@@ -33,13 +33,14 @@ def decode_jwt(token: str, algorithm="HS512") -> dict:
         raise UnauthenticatedError('session expired')
 
 
-def generate_payload(username: str) -> dict:
+def generate_payload(username: str, role: str) -> dict:
     """
     @param username: string
     @return:
     """
     return {
         'username': username,
+        'role': role,
         'aud': ENTITY_STC_BACKEND,
         'iss': ENTITY_STC,
         'iat': datetime.now(tz=timezone.utc),
@@ -59,7 +60,7 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if AUTH_ENABLED != "1":
-            return f(*args)
+            return f(*args, **kwargs)
         token = None
         if "Authorization" in request.headers:
             token = request.headers["Authorization"].split(" ")[1]
@@ -77,6 +78,48 @@ def token_required(f):
             if current_user is None:
                 return {
                            "message": "Invalid Authentication token!",
+                           "data": None,
+                           "error": "Unauthorized"
+                       }, 401
+        except Exception as e:
+            return {
+                       "message": "Unauthenticated",
+                       "data": None,
+                       "error": str(e)
+                   }, 401
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+def admin_only(f):
+    """
+    Wrapper function to authenticate if caller is admin
+    we have to pass user_repo as part of the services that we want to authorize
+    @param f:
+    @return:
+    """
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if AUTH_ENABLED != "1":
+            return f(*args, **kwargs)
+        token = None
+        if "Authorization" in request.headers:
+            token = request.headers["Authorization"].split(" ")[1]
+        if not token:
+            return {
+                       "message": "Authentication Token is missing!",
+                       "data": None,
+                       "error": "Unauthorized"
+                   }, 401
+        try:
+            data = decode_jwt(token)
+            role = data.get("role", "USER")
+            if role != "ADMIN":
+                return {
+                           "message": "Action not allowed!",
                            "data": None,
                            "error": "Unauthorized"
                        }, 401

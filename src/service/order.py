@@ -2,7 +2,7 @@ import json
 
 from flask_restful import Resource
 from flask import abort, jsonify, make_response, request
-from utils import InvalidArgumentError, UnauthenticatedError, InternalError
+from utils import InvalidArgumentError, UnauthenticatedError, InternalError, admin_only
 import logging
 from utils import token_required
 from ..repo.view import order as view
@@ -37,4 +37,27 @@ class Order(Resource):
             abort(400, e)
         except InternalError as e:
             logging.error('Failed to create order ', e)
+            abort(500, e)
+
+    @token_required
+    @admin_only
+    def get(self):
+        try:
+            flter = request.args
+            result = self.repo.list_orders(flter.to_dict())
+
+            return make_response(jsonify({
+                'success': True,
+                'data': {
+                    'orders': result
+                }
+            }), 200)
+        except UnauthenticatedError as e:
+            logging.error('Failed to list orders ', e)
+            abort(401, e)
+        except InvalidArgumentError as e:
+            logging.error('Failed to list orders ', e)
+            abort(400, e)
+        except InternalError as e:
+            logging.error('Failed to list orders ', e)
             abort(500, e)

@@ -8,12 +8,13 @@ class Order:
         Order -> OrderItem -> Item
     """
 
-    def __init__(self, customer, created_by, order_items, notes):
+    def __init__(self, customer, created_by, order_items, notes, created_at, modified_at):
         self.id = uuid.uuid4().__str__()
         self.customer = customer
         self.created_by = created_by
         self.order_items = order_items
         self.notes = notes
+        self.created_at = created_at
 
     def validate(self):
         if self.id == '':
@@ -73,3 +74,4 @@ class OrderSchema(Schema):
     created_by = fields.Str()
     order_items = fields.List(fields.Nested(OrderItemSchema()))
     notes = fields.Str()
+    created_at = fields.Str()

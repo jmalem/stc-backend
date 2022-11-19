@@ -8,7 +8,9 @@ def from_req_2_model_order(dt):
         dt.get('customer', ""),
         dt.get('createdBy', ""),
         from_req_2_model_order_item_array(dt.get('orderItems', [])),
-        dt.get('notes', "")
+        dt.get('notes', ""),
+        "",
+        ""
     )
 
 

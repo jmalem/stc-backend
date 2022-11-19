@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 # define const
 load_dotenv()
-S3_CUSTOMER_BUCKET_NAME = 'stc-customer-test'
+S3_CUSTOMER_BUCKET_NAME = 'stc-customer-prod'
 CUSTOMER_S3_KEY = 'customer.xlsx'
 CUSTOMER_OUTPUT_PATH = 'data/customer.xlsx'
 
