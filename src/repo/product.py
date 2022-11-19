@@ -140,7 +140,7 @@ class Product:
                     MaxKeys=5
                 )
 
-                contents = objs.get('Contents')
+                contents = objs.get('Contents', [])
                 for c in contents:
                     medias.append(c.get('Key'))
                 self.img_cache[item_id] = medias
