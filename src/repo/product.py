@@ -9,6 +9,8 @@ from enum import Enum
 
 # define const
 load_dotenv()
+CLOUDFRONT_BASE_URL = 'https://d275ztx7df59re.cloudfront.net/'
+IMAGE_JPG = '.jpg'
 S3_BUCKET_NAME = 'stc-repo-prod'
 S3_IMAGE_BUCKET_NAME = 'stc-images-prod'
 S3_KEY = 'HS-toys.mdb'
@@ -75,6 +77,9 @@ class Product:
             }, inplace=True)
             # Extract price out of HARGA
             df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+
+            # Generates imageUrl in cloudfront (not always available)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
 
             # Extract packing and unit from PACKING
             df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
