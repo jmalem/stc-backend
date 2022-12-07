@@ -1,8 +1,7 @@
 from flask_restful import Resource
 from flask import abort, jsonify, make_response
 import logging
-from utils import token_required
-from src.repo.product import Product as ProductRepo
+from utils import token_required, admin_only
 
 
 class ProductBuild(Resource):
@@ -11,6 +10,7 @@ class ProductBuild(Resource):
         self.user_repo = user_repo
 
     @token_required
+    @admin_only
     def post(self):
         try:
             # downloads from gdrive

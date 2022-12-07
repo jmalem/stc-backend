@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import abort, jsonify, make_response
 import logging
-from utils import token_required
+from utils import token_required, admin_only
 
 
 class CustomerBuild(Resource):
@@ -10,6 +10,7 @@ class CustomerBuild(Resource):
         self.user_repo = user_repo
 
     @token_required
+    @admin_only
     def post(self):
         try:
             # downloads from gdrive
