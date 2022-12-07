@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import abort, jsonify, make_response, request
 import logging
-from utils import token_required
+from utils import token_required, get_role
 
 
 class Product(Resource):
@@ -12,8 +12,9 @@ class Product(Resource):
     @token_required
     def get(self):
         try:
+            role = get_role(request.headers)
             flter = request.args
-            result = self.repo.list(flter.to_dict())
+            result = self.repo.list(flter.to_dict(), role)
 
             return make_response(jsonify({
                 'success': True,

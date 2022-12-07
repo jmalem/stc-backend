@@ -133,3 +133,8 @@ def admin_only(f):
         return f(*args, **kwargs)
 
     return decorated
+
+def get_role(headers):
+    token = headers["Authorization"].split(" ")[1]
+    data = decode_jwt(token)
+    return data.get("role", "GUEST")

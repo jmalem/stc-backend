@@ -20,7 +20,7 @@ class ProductBuild(Resource):
             # load new csv
             self.repo.load_csv()
             # returns new lists
-            result = self.repo.list({})
+            result = self.repo.list({}, 'ADMIN')
 
             return make_response(jsonify({
                 'success': True,
