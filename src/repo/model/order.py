@@ -8,13 +8,13 @@ class Order:
         Order -> OrderItem -> Item
     """
 
-    def __init__(self, customer, created_by, order_items, notes, created_at, modified_at):
+    def __init__(self, customer, createdBy, orderItems, notes, createdAt, modifiedAt):
         self.id = uuid.uuid4().__str__()
         self.customer = customer
-        self.created_by = created_by
-        self.order_items = order_items
+        self.createdBy = createdBy
+        self.orderItems = orderItems
         self.notes = notes
-        self.created_at = created_at
+        self.createdAt = createdAt
 
     def validate(self):
         if self.id == '':
@@ -23,55 +23,55 @@ class Order:
         if self.customer == '':
             raise InvalidArgumentError('invalid customer')
 
-        if self.created_by == '':
-            raise InvalidArgumentError('invalid created_by')
+        if self.createdBy == '':
+            raise InvalidArgumentError('invalid createdBy')
 
-        if len(self.order_items) == 0:
-            raise InvalidArgumentError('order_items cannot be empty')
+        if len(self.orderItems) == 0:
+            raise InvalidArgumentError('orderItems cannot be empty')
 
-        for order_item in self.order_items:
+        for order_item in self.orderItems:
             order_item.validate()
 
-    def get_id(self) -> str:
+    def getId(self) -> str:
         return self.id
 
-    def get_customer(self) -> str:
+    def getCustomer(self) -> str:
         return self.customer
 
-    def get_created_by(self) -> str:
-        return self.created_by
+    def getCreatedBy(self) -> str:
+        return self.createdBy
 
-    def get_order_items(self):
-        return self.order_items
+    def getOrderItems(self):
+        return self.orderItems
 
-    def get_notes(self) -> str:
+    def getNotes(self) -> str:
         return self.notes
 
 
 class ItemSchema(Schema):
-    item_id = fields.Str()
+    itemId = fields.Str()
     title = fields.Str()
     category = fields.Str()
-    display_id = fields.Str()
+    displayId = fields.Str()
     packing = fields.Str()
     unit = fields.Str()
-    unit_price = fields.Decimal()
-    image_url = fields.Str()
+    unitPrice = fields.Decimal()
+    imageUrl = fields.Str()
 
 
 class OrderItemSchema(Schema):
     item = fields.Nested(ItemSchema())
-    carton_qty = fields.Decimal()
-    unit_qty = fields.Decimal()
-    discount_rp = fields.Decimal()
-    discount_percent = fields.Decimal()
+    cartonQty = fields.Decimal()
+    unitQty = fields.Decimal()
+    discountRp = fields.Decimal()
+    discountPercent = fields.Decimal()
     notes = fields.Str()
 
 
 class OrderSchema(Schema):
     id = fields.Str()
     customer = fields.Str()
-    created_by = fields.Str()
-    order_items = fields.List(fields.Nested(OrderItemSchema()))
+    createdBy = fields.Str()
+    orderItems = fields.List(fields.Nested(OrderItemSchema()))
     notes = fields.Str()
-    created_at = fields.Str()
+    createdAt = fields.Str()

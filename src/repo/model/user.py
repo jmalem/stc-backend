@@ -2,6 +2,8 @@ import uuid
 from utils import InvalidArgumentError
 from marshmallow import Schema, fields
 
+allowed_role = ['ADMIN', 'USER', 'GUEST']
+
 
 class User:
     def __init__(self, username, password, fullname, role):
@@ -29,6 +31,9 @@ class User:
         if self.role == '':
             raise InvalidArgumentError('role cannot be empty')
 
+        if self.role not in allowed_role:
+            raise InvalidArgumentError('role is invalid')
+
     def get_username(self) -> str:
         return self.username
 
@@ -43,4 +48,3 @@ class User:
 
     def toString(self) -> str:
         return self.username + "\n" + self.password
-

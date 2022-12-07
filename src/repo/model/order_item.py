@@ -7,39 +7,39 @@ class OrderItem:
         Order -> OrderItem -> Item
     """
 
-    def __init__(self, item, carton_qty, unit_qty, discount_rp, discount_percent, notes):
+    def __init__(self, item, cartonQty, unitQty, discountRp, discountPercent, notes):
         self.item = item
-        self.carton_qty = carton_qty
-        self.unit_qty = unit_qty
-        self.discount_rp = discount_rp
-        self.discount_percent = discount_percent
+        self.cartonQty = cartonQty
+        self.unitQty = unitQty
+        self.discountRp = discountRp
+        self.discountPercent = discountPercent
         self.notes = notes
 
     def validate(self):
         self.item.validate()
-        if self.carton_qty and self.carton_qty <= 0:
-            raise InvalidArgumentError('invalid carton_qty - must be greater than zero')
-        if self.unit_qty and self.unit_qty <= 0:
-            raise InvalidArgumentError('invalid unit_qty - must be greater than zero')
-        if self.discount_rp and self.discount_rp < 0:
-            raise InvalidArgumentError('invalid discount_rp - must be at least zero')
-        if self.discount_percent and self.discount_percent < 0:
-            raise InvalidArgumentError('invalid discount_percent - must be at least zero')
+        if self.cartonQty and self.cartonQty <= 0:
+            raise InvalidArgumentError('invalid cartonQty - must be greater than zero')
+        if self.unitQty and self.unitQty <= 0:
+            raise InvalidArgumentError('invalid unitQty - must be greater than zero')
+        if self.discountRp and self.discountRp < 0:
+            raise InvalidArgumentError('invalid discountRp - must be at least zero')
+        if self.discountPercent and self.discountPercent < 0:
+            raise InvalidArgumentError('invalid discountPercent - must be at least zero')
 
-    def get_item(self) -> Item:
+    def getItem(self) -> Item:
         return self.item
 
-    def get_carton_qty(self) -> str:
-        return self.carton_qty
+    def getCartonQty(self) -> str:
+        return self.cartonQty
 
-    def get_unit_qty(self) -> str:
-        return self.unit_qty
+    def getUnitQty(self) -> str:
+        return self.unitQty
 
-    def get_discount_rp(self) -> str:
-        return self.discount_rp
+    def getDiscountRp(self) -> str:
+        return self.discountRp
 
-    def get_discount_percent(self) -> str:
-        return self.discount_percent
+    def getDiscountPercent(self) -> str:
+        return self.discountPercent
 
-    def get_notes(self) -> str:
+    def getNotes(self) -> str:
         return self.notes

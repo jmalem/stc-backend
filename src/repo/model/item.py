@@ -5,25 +5,25 @@ class Item:
     """
         Order -> OrderItem -> Item
     """
-    def __init__(self, item_id, title, category, display_id, packing, unit, unit_price, image_url):
-        self.item_id = item_id
+    def __init__(self, itemId, title, category, displayId, packing, unit, unitPrice, imageUrl):
+        self.itemId = itemId
         self.title = title
         self.category = category
-        self.display_id = display_id
+        self.displayId = displayId
         self.packing = packing
         self.unit = unit
-        self.unit_price = unit_price
-        self.image_url = image_url
+        self.unitPrice = unitPrice
+        self.imageUrl = imageUrl
 
     def validate(self):
-        if self.item_id == '':
-            raise InvalidArgumentError('invalid item_id')
+        if self.itemId == '':
+            raise InvalidArgumentError('invalid itemId')
 
         if self.title == '':
             raise InvalidArgumentError('invalid title')
 
-        if self.display_id == '':
-            raise InvalidArgumentError('invalid display_id')
+        if self.displayId == '':
+            raise InvalidArgumentError('invalid displayId')
 
         if self.packing == '':
             raise InvalidArgumentError('invalid packing')
@@ -31,29 +31,29 @@ class Item:
         if self.unit == '':
             raise InvalidArgumentError('invalid unit')
 
-        if self.unit_price <= 0:
+        if self.unitPrice <= 0:
             raise InvalidArgumentError('invalid unit price')
 
-    def get_item_id(self) -> str:
-        return self.item_id
+    def getItemId(self) -> str:
+        return self.itemId
 
-    def get_title(self) -> str:
+    def getTitle(self) -> str:
         return self.title
 
-    def get_category(self) -> str:
+    def getCategory(self) -> str:
         return self.category
 
-    def get_display_id(self) -> str:
-        return self.display_id
+    def getDisplayId(self) -> str:
+        return self.displayId
 
-    def get_packing(self) -> str:
+    def getPacking(self) -> str:
         return self.packing
 
-    def get_unit(self) -> str:
+    def getUnit(self) -> str:
         return self.unit
 
-    def get_unit_price(self) -> int:
-        return self.unit_price
+    def getUnitPrice(self) -> int:
+        return self.unitPrice
 
-    def get_image_url(self) -> str:
-        return self.image_url
+    def getImageUrl(self) -> str:
+        return self.imageUrl
