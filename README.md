@@ -77,3 +77,10 @@ Build and run manually (this one does not include .env var)
 docker build -t flask-docker:latest . 
 docker run -p 5000:5000 flask-docker  
 ```
+
+### Push and Deploy via Heroku
+```
+heroku container:push web
+heroku container:release web
+heroku ps:scale web=1
+```
