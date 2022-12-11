@@ -80,7 +80,7 @@ class Order:
 
     def create(self, order: OrderModel):
         try:
-            order.created_at = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            order.createdAt = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
             schema = OrderSchema()
             json_result = schema.dump(order)
@@ -120,13 +120,13 @@ class Order:
             cond = None
 
             if after is not None:
-                cond = Attr('created_at').gte(after)
+                cond = Attr('createdAt').gte(after)
 
             if before is not None:
                 if cond is None:
-                    cond = Attr('created_at').lte(before)
+                    cond = Attr('createdAt').lte(before)
                 else:
-                    cond = cond & Attr('created_at').lte(before)
+                    cond = cond & Attr('createdAt').lte(before)
 
             cond_kwargs = {}
             if cond:

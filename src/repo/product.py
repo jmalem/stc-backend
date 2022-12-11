@@ -91,7 +91,7 @@ class Product:
         else:
             raise InternalError('data not found')
 
-    def list(self, filters):
+    def list(self, filters, role):
         try:
             df = self.df
             # apply filter
@@ -118,6 +118,12 @@ class Product:
                 is_asc = sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.NAME_ASC.name
                 df = df.sort_values(by=sort_key, ascending=is_asc)
 
+            if role == 'GUEST':
+                # have to create shallow copy here, as dropping the column directly
+                # will also alter the original dataframe
+                new_df = df.drop(['unitPrice'], axis=1)
+                return new_df.to_dict(orient="records")
+
             tmp = df.to_dict(orient="records")
             return tmp
         except FileNotFoundError:
@@ -129,12 +135,15 @@ class Product:
         except Exception as e:
             raise InternalError('Failed to list', e)
 
-    def get(self, item_id):
+    def get(self, item_id, role):
         try:
-
             df = self.df.loc[self.df['itemId'] == item_id].head(1)
             if len(df.index) == 0:
                 raise NotFoundError('item not found')
+
+            # df is a copy of the single item from the original dataframe
+            if role == 'GUEST':
+                df.drop(['unitPrice'], axis=1, inplace=True)
 
             medias = self.img_cache.get(item_id, [])
             if len(medias) == 0:
