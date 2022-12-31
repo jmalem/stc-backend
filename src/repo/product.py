@@ -9,7 +9,7 @@ from enum import Enum
 
 # define const
 load_dotenv()
-CLOUDFRONT_BASE_URL = 'https://d275ztx7df59re.cloudfront.net/'
+CLOUDFRONT_BASE_URL = os.getenv('AWS_CDN_URL')
 IMAGE_JPG = '.jpg'
 S3_BUCKET_NAME = 'stc-repo-prod'
 S3_IMAGE_BUCKET_NAME = 'stc-images-prod'
@@ -156,7 +156,8 @@ class Product:
 
                 contents = objs.get('Contents', [])
                 for c in contents:
-                    medias.append(c.get('Key'))
+                    url = CLOUDFRONT_BASE_URL + c.get('Key')
+                    medias.append(url)
                 self.img_cache[item_id] = medias
             else:
                 print('cache found for ', item_id)

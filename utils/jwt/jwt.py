@@ -107,7 +107,8 @@ def admin_only(f):
             return f(*args, **kwargs)
         token = None
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]
+            headers = request.headers["Authorization"].split(" ")
+            token = headers[1]
         if not token:
             return {
                        "message": "Authentication Token is missing!",
