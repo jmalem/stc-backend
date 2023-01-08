@@ -10,8 +10,8 @@ from src.repo.model.order import Order as OrderModel, OrderSchema
 
 logger = logging.getLogger(__name__)
 CUSTOMER = 'customer'
-BEFORE = 'before'
-AFTER = 'after'
+BEFORE = 'toDate'
+AFTER = 'fromDate'
 
 
 class Order:
