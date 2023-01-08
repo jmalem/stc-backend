@@ -116,7 +116,13 @@ class Order:
                 raise InternalError('Filter type error')
             customer = filters.get(CUSTOMER, '')
             before = filters.get(BEFORE, None)
+            before = (datetime.datetime.fromisoformat(before)).replace(hour=23, minute=59, second=59)
+            before = before.isoformat()
             after = filters.get(AFTER, None)
+            after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
+            after = after.isoformat()
+
+
             cond = None
 
             if after is not None:
