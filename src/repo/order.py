@@ -116,16 +116,17 @@ class Order:
                 raise InternalError('Filter type error')
             customer = filters.get(CUSTOMER, '')
             before = filters.get(BEFORE, None)
-            if before.find('Z') > -1:
-                before = before[:-1]
-
-            before = (datetime.datetime.fromisoformat(before)).replace(hour=23, minute=59, second=59)
-            before = before.isoformat()
+            if before:
+                if before.find('Z') > -1:
+                    before = before[:-1]
+                before = (datetime.datetime.fromisoformat(before)).replace(hour=23, minute=59, second=59)
+                before = before.isoformat()
             after = filters.get(AFTER, None)
-            if after.find('Z') > -1:
-                after = after[:-1]
-            after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
-            after = after.isoformat()
+            if after:
+                if after.find('Z') > -1:
+                    after = after[:-1]
+                after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
+                after = after.isoformat()
 
 
             cond = None
