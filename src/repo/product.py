@@ -6,6 +6,7 @@ from utils import InternalError, NotFoundError
 from dotenv import load_dotenv
 import re
 from enum import Enum
+import urllib
 
 # define const
 load_dotenv()
@@ -79,7 +80,7 @@ class Product:
             df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
 
             # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + str(x['itemId']) + IMAGE_JPG, axis=1)
+            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
 
             # Extract packing and unit from PACKING
             df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
@@ -144,7 +145,6 @@ class Product:
             # df is a copy of the single item from the original dataframe
             if role == 'GUEST':
                 df.drop(['unitPrice'], axis=1, inplace=True)
-
             medias = self.img_cache.get(item_id, [])
             if len(medias) == 0:
                 objs = self.s3.meta.client.list_objects_v2(

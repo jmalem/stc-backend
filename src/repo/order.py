@@ -10,7 +10,7 @@ from src.repo.model.order import Order as OrderModel, OrderSchema
 
 logger = logging.getLogger(__name__)
 CUSTOMER = 'customer'
-SALESPERSON = 'createdBy'
+CREATEDBY = 'createdBy'
 BEFORE = 'toDate'
 AFTER = 'fromDate'
 
@@ -116,7 +116,7 @@ class Order:
             if type(filters) is not dict:
                 raise InternalError('Filter type error')
             customer = filters.get(CUSTOMER, '')
-            salesperson = filters.get(SALESPERSON, '')
+            created_by = filters.get(CREATEDBY, '')
             before = filters.get(BEFORE, None)
             if before:
                 if before.find('Z') > -1:
@@ -146,11 +146,11 @@ class Order:
                     cond = Attr('createdBy').contains(fullname)
                 cond = cond & Attr('createdBy').contains(fullname)
             else:
-                if salesperson is not None:
+                if created_by is not None:
                     if cond is None:
-                        cond = Attr('createdBy').contains(salesperson)
+                        cond = Attr('createdBy').contains(created_by)
                     else:
-                        cond = cond & Attr('createdBy').contains(salesperson)
+                        cond = cond & Attr('createdBy').contains(created_by)
 
             cond_kwargs = {}
             if cond:
