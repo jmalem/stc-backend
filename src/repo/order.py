@@ -111,7 +111,7 @@ class Order:
         else:
             return response['Item']
 
-    def list_orders(self, filters):
+    def list_orders(self, filters, role, fullname):
         try:
             if type(filters) is not dict:
                 raise InternalError('Filter type error')
@@ -130,7 +130,6 @@ class Order:
                 after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
                 after = after.isoformat()
 
-
             cond = None
 
             if after is not None:
@@ -142,8 +141,16 @@ class Order:
                 else:
                     cond = cond & Attr('createdAt').lte(before)
 
-            if salesperson is not None:
-                cond = cond & Attr('createdBy').contains(salesperson)
+            if role == "USER":
+                if cond is None:
+                    cond = Attr('createdBy').contains(fullname)
+                cond = cond & Attr('createdBy').contains(fullname)
+            else:
+                if salesperson is not None:
+                    if cond is None:
+                        cond = Attr('createdBy').contains(salesperson)
+                    else:
+                        cond = cond & Attr('createdBy').contains(salesperson)
 
             cond_kwargs = {}
             if cond:

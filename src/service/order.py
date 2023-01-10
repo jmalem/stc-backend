@@ -2,7 +2,7 @@ import json
 
 from flask_restful import Resource
 from flask import abort, jsonify, make_response, request
-from utils import InvalidArgumentError, UnauthenticatedError, InternalError, admin_only
+from utils import InvalidArgumentError, UnauthenticatedError, InternalError, get_role, get_username
 import logging
 from utils import token_required
 from ..repo.view import order as view
@@ -40,11 +40,20 @@ class Order(Resource):
             abort(500, e)
 
     @token_required
-    @admin_only
     def get(self):
         try:
             flter = request.args
-            result = self.repo.list_orders(flter.to_dict())
+            role = get_role(request.headers)
+            if role != 'ADMIN' and role != 'USER':
+                return {
+                           "message": "Action not allowed!",
+                           "data": None,
+                           "error": "Unauthorized"
+                       }, 401
+            username = get_username(request.headers)
+            user = self.user_repo.get(username)
+            name = user.get('fullname', '')
+            result = self.repo.list_orders(flter.to_dict(), role, name)
 
             return make_response(jsonify({
                 'success': True,
