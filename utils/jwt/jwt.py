@@ -139,3 +139,8 @@ def get_role(headers):
     token = headers["Authorization"].split(" ")[1]
     data = decode_jwt(token)
     return data.get("role", "GUEST")
+
+def get_username(headers):
+    token = headers["Authorization"].split(" ")[1]
+    data = decode_jwt(token)
+    return data.get("username", "")

@@ -10,6 +10,7 @@ from src.repo.model.order import Order as OrderModel, OrderSchema
 
 logger = logging.getLogger(__name__)
 CUSTOMER = 'customer'
+CREATEDBY = 'createdBy'
 BEFORE = 'toDate'
 AFTER = 'fromDate'
 
@@ -110,11 +111,12 @@ class Order:
         else:
             return response['Item']
 
-    def list_orders(self, filters):
+    def list_orders(self, filters, role, fullname):
         try:
             if type(filters) is not dict:
                 raise InternalError('Filter type error')
             customer = filters.get(CUSTOMER, '')
+            created_by = filters.get(CREATEDBY, '')
             before = filters.get(BEFORE, None)
             if before:
                 if before.find('Z') > -1:
@@ -128,7 +130,6 @@ class Order:
                 after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
                 after = after.isoformat()
 
-
             cond = None
 
             if after is not None:
@@ -140,6 +141,17 @@ class Order:
                 else:
                     cond = cond & Attr('createdAt').lte(before)
 
+            if role == "USER":
+                if cond is None:
+                    cond = Attr('createdBy').contains(fullname)
+                cond = cond & Attr('createdBy').contains(fullname)
+            else:
+                if created_by is not None:
+                    if cond is None:
+                        cond = Attr('createdBy').contains(created_by)
+                    else:
+                        cond = cond & Attr('createdBy').contains(created_by)
+
             cond_kwargs = {}
             if cond:
                 cond_kwargs['FilterExpression'] = cond
@@ -149,6 +161,7 @@ class Order:
                     KeyConditionExpression=Key('customer').eq(customer),
                     **cond_kwargs
                 )
+
             # we have to scan when customer is not specified
             else:
                 response = self.table.scan(
