@@ -20,7 +20,8 @@ OUTPUT_PATH = 'data/HS-toys.mdb'
 # init logger
 logger = logging.getLogger(__name__)
 
-COL_LIST = ["NAMA_BRG", "ITEM_BRG", "PACKING", "HARGA", "PARTAI", "Swatch_PRINT"]
+COL_LIST = ["NAMA_BRG", "ITEM_BRG", "PACKING",
+            "HARGA", "PARTAI", "Swatch_PRINT"]
 
 SEARCH = 'search'
 CATEGORY = 'category'
@@ -80,10 +81,12 @@ class Product:
             df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
 
             # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
+            df['imageUrl'] = df.apply(
+                lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
 
             # Extract packing and unit from PACKING
-            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(extract_packing_and_unit(str(x['PACKING']))), axis=1)
+            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
+                extract_packing_and_unit(str(x['PACKING']))), axis=1)
 
             # drop unwanted column
             df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
@@ -101,14 +104,17 @@ class Product:
             chain = None
             search = filters.get(SEARCH)
             if search:
-                chain = (df['displayId'].str.contains(search, na=False, case=False) | df['title'].str.contains(search, na=False, case=False))
+                chain = (df['displayId'].str.contains(search, na=False, case=False)
+                         | df['title'].str.contains(search, na=False, case=False))
 
             category = filters.get(CATEGORY)
             if category:
                 if chain is None:
-                    chain = df['category'].str.contains(category, na=False, case=False)
+                    chain = df['category'].str.contains(
+                        category, na=False, case=False)
                 else:
-                    chain = chain & df['category'].str.contains(category, na=False, case=False)
+                    chain = chain & df['category'].str.contains(
+                        category, na=False, case=False)
 
             if chain is not None:
                 df = df.loc[chain]
@@ -118,11 +124,20 @@ class Product:
                 sort_key = "unitPrice" if sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.PRICE_DESC.name else "title"
                 is_asc = sort_by == SortBy.PRICE_ASC.name or sort_by == SortBy.NAME_ASC.name
                 df = df.sort_values(by=sort_key, ascending=is_asc)
+            else:
+                # By default sort in ascending order of Item ID
+                df = df.sort_values(by="itemId")
 
             if role == 'GUEST':
                 # have to create shallow copy here, as dropping the column directly
                 # will also alter the original dataframe
                 new_df = df.drop(['unitPrice'], axis=1)
+                return new_df.to_dict(orient="records")
+
+            if role == 'ADMIN_VIEW_OLD_EMPTY':
+                # For these users we only want to return items that have a category of
+                # 'H' which denotes an item that is either OLD or OUT OF STOCK
+                new_df = df[df['category'] == 'H']
                 return new_df.to_dict(orient="records")
 
             tmp = df.to_dict(orient="records")
