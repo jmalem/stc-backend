@@ -2,7 +2,7 @@ import uuid
 from utils import InvalidArgumentError
 from marshmallow import Schema, fields
 
-allowed_role = ['ADMIN', 'USER', 'GUEST']
+allowed_role = ['ADMIN', 'USER', 'GUEST', 'ADMIN_VIEW_OLD_EMPTY']
 
 
 class User:
@@ -20,7 +20,8 @@ class User:
             raise InvalidArgumentError('password cannot be empty')
 
         if len(self.password) <= 8:
-            raise InvalidArgumentError('password must be longer than 8 characters')
+            raise InvalidArgumentError(
+                'password must be longer than 8 characters')
 
     def validate(self):
         self.validate_login()
