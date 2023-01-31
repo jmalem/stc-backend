@@ -121,13 +121,13 @@ class Order:
             if before:
                 if before.find('Z') > -1:
                     before = before[:-1]
-                before = (datetime.datetime.fromisoformat(before)).replace(hour=23, minute=59, second=59)
+                before = datetime.datetime.fromisoformat(before)
                 before = before.isoformat()
             after = filters.get(AFTER, None)
             if after:
                 if after.find('Z') > -1:
                     after = after[:-1]
-                after = (datetime.datetime.fromisoformat(after)).replace(hour=0, minute=0, second=0)
+                after = datetime.datetime.fromisoformat(after)
                 after = after.isoformat()
 
             cond = None
