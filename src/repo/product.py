@@ -110,11 +110,9 @@ class Product:
             category = filters.get(CATEGORY)
             if category:
                 if chain is None:
-                    chain = df['category'].str.contains(
-                        category, na=False, case=False)
+                    chain = df['category'].isin([category])
                 else:
-                    chain = chain & df['category'].str.contains(
-                        category, na=False, case=False)
+                    chain = chain & df['category'].isin([category])
 
             if chain is not None:
                 df = df.loc[chain]
