@@ -75,16 +75,12 @@ def init_repo():
 
     # Will download mdb and build product
     try:
-        file_exists = os.path.exists('data/data.csv')
-        if not file_exists:
-            print("trying to download new mdb file..")
-            product_db.init()
-            print("converts mdb to csv file..")
-            product_db.export_to_csv()
-        cust_file_exists = os.path.exists('data/customer.xlsx')
-        if not cust_file_exists:
-            print("trying to download new xlsx file..")
-            customer_db.init()
+        print("trying to download new mdb file..")
+        product_db.init()
+        print("converts mdb to csv file..")
+        product_db.export_to_csv()
+        print("trying to download new xlsx file..")
+        customer_db.init()
         print("loading csv file..")
         product_db.load_csv()
         print("loading customer file..")

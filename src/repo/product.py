@@ -59,6 +59,7 @@ class Product:
         """
         Pull HS-toys.mdb from stc-repo-test bucket
         """
+        os.system('make clear.data')
         self.s3.meta.client.download_file(S3_BUCKET_NAME, S3_KEY, OUTPUT_PATH)
 
     def export_to_csv(self):

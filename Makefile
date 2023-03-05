@@ -24,5 +24,9 @@ data:
 	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${product_list_table_name} > ${current_dir}/data/data.csv 2>&1
 	$(info $(M) Generated data/data.csv)
 
+clear.data:
+	$Q rm ./data/data.csv ./data/HS-toys.mdb
+	$(info $(M) Removed data/data.csv)
+
 build:
 	$Q docker-compose --env-file .env up --build
