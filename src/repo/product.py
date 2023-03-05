@@ -27,6 +27,8 @@ SEARCH = 'search'
 CATEGORY = 'category'
 SORT_BY = 'sortBy'
 
+FILE_LIST = ['data/data1.csv', 'data/data2.csv', 'data/data3.csv']
+
 
 def extract_packing_and_unit(dt):
     packing = dt.split(" ")
@@ -52,7 +54,8 @@ class Product:
     def __init__(self, s3):
         self.table = None
         self.s3 = s3
-        self.df = None
+        self.df = None # data frame for swatch 1,2,3
+        self.df_user = None # data frame only for swatch 1
         self.img_cache = dict()
 
     def init(self):
@@ -66,39 +69,33 @@ class Product:
         os.system('make data')
 
     def load_csv(self):
-        file_exists = os.path.exists('data/data.csv')
+        file_exists = os.path.exists('data/data1.csv') and \
+                      os.path.exists('data/data2.csv') and \
+                      os.path.exists('data/data3.csv')
         if file_exists:
-            # init the csv
-            df = pd.read_csv('data/data.csv', delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
-                replace({np.nan: None})
+            # init the list of csv
+            li = []
+            for filename in FILE_LIST:
+                frame = pd.read_csv(filename, delimiter='|', on_bad_lines='skip', usecols=COL_LIST). \
+                    replace({np.nan: None})
+                li.append(frame)
 
-            df.rename(columns={
-                'ITEM_BRG': 'displayId',
-                'NAMA_BRG': 'title',
-                'Swatch_PRINT': 'itemId',
-                'PARTAI': 'category',
-            }, inplace=True)
-            # Extract price out of HARGA
-            df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+            df = pd.concat(li, axis=0, ignore_index=True)
 
-            # Generates imageUrl in cloudfront (not always available)
-            df['imageUrl'] = df.apply(
-                lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
-
-            # Extract packing and unit from PACKING
-            df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
-                extract_packing_and_unit(str(x['PACKING']))), axis=1)
-
-            # drop unwanted column
-            df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
-
+            df = dataframe_aggregation(df)
             self.df = df
+
+            # initialize data fram for USER and GUEST (contains swatch 1)
+            df_user = dataframe_aggregation(li[0])
+            self.df_user = df_user
         else:
             raise InternalError('data not found')
 
     def list(self, filters, role):
         try:
             df = self.df
+            if role == 'GUEST' or role == 'USER':
+                df = self.df_user
             # apply filter
             if type(filters) is not dict:
                 raise InternalError('Filter type error')
@@ -133,12 +130,6 @@ class Product:
                 new_df = df.drop(['unitPrice'], axis=1)
                 return new_df.to_dict(orient="records")
 
-            if role == 'ADMIN_VIEW_OLD_EMPTY':
-                # For these users we only want to return items that have a category of
-                # 'H' which denotes an item that is either OLD or OUT OF STOCK
-                new_df = df[df['category'] == 'H']
-                return new_df.to_dict(orient="records")
-
             tmp = df.to_dict(orient="records")
             return tmp
         except FileNotFoundError:
@@ -153,6 +144,8 @@ class Product:
     def get(self, item_id, role):
         try:
             df = self.df.loc[self.df['itemId'] == item_id].head(1)
+            if role == 'GUEST' or role == 'USER':
+                df = self.df_user.loc[self.df['itemId'] == item_id].head(1)
             if len(df.index) == 0:
                 raise NotFoundError('item not found')
 
@@ -193,3 +186,27 @@ class Product:
             raise e
         except Exception as e:
             raise InternalError('Failed to list', e)
+
+
+# change the data frame, columns, and apply filters
+def dataframe_aggregation(df):
+    df.rename(columns={
+        'ITEM_BRG': 'displayId',
+        'NAMA_BRG': 'title',
+        'Swatch_PRINT': 'itemId',
+        'PARTAI': 'category',
+    }, inplace=True)
+    # Extract price out of HARGA
+    df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
+
+    # Generates imageUrl in cloudfront (not always available)
+    df['imageUrl'] = df.apply(
+        lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
+
+    # Extract packing and unit from PACKING
+    df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
+        extract_packing_and_unit(str(x['PACKING']))), axis=1)
+
+    # drop unwanted column
+    df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
+    return df

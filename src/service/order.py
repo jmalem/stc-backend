@@ -54,7 +54,7 @@ class Order(Resource):
             user = self.user_repo.get(username)
             name = user.get('fullname', '')
             result = self.repo.list_orders(flter.to_dict(), role, name)
-
+            result.sort(key=lambda x: x['createdAt'], reverse=True)
             return make_response(jsonify({
                 'success': True,
                 'data': {

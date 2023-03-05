@@ -8,7 +8,9 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 .PHONY: run lib* data* build*
 
 current_dir=$(CURDIR)
-product_list_table_name=$(PRODUCT_TABLE_NAME)
+table_swatch_1=$(PRODUCT_TABLE_NAME_1)
+table_swatch_2=$(PRODUCT_TABLE_NAME_2)
+table_swatch_3=$(PRODUCT_TABLE_NAME_3)
 
 run:
 	python3 main.py
@@ -21,12 +23,16 @@ lib.install:
 	pip3 install -r requirements.txt
 
 data:
-	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${product_list_table_name} > ${current_dir}/data/data.csv 2>&1
+	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_1} > ${current_dir}/data/data1.csv 2>&1
 	$(info $(M) Generated data/data.csv)
+	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_2} > ${current_dir}/data/data2.csv 2>&1
+	$(info $(M) Generated data/data2.csv)
+	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_3} > ${current_dir}/data/data3.csv 2>&1
+	$(info $(M) Generated data/data3.csv)
 
 clear.data:
-	$Q rm ./data/data.csv ./data/HS-toys.mdb
-	$(info $(M) Removed data/data.csv)
+	$Q rm ./data/data1.csv ./data/data2.csv ./data/data3.csv ./data/HS-toys.mdb
+	$(info $(M) Removed data/data1.csv data/data2.csv data/data3.csv)
 
 build:
 	$Q docker-compose --env-file .env up --build
