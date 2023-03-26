@@ -45,7 +45,7 @@ def generate_payload(username: str, role: str) -> dict:
         'iss': ENTITY_STC,
         'iat': datetime.now(tz=timezone.utc),
         'sub': ENTITY_STC,
-        'exp': datetime.now(tz=timezone.utc) + timedelta(minutes=120)
+        'exp': datetime.now(tz=timezone.utc) + timedelta(hours=24)
     }
 
 

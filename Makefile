@@ -23,7 +23,7 @@ lib.install:
 	pip3 install -r requirements.txt
 
 data:
-	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_1} > ${current_dir}/data/data1.csv 2>&1
+	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_1} | sed 'N;s/\(.*\)warning.*pg=23\n\(.*\)/\1\2/;P;$d;D;' > ${current_dir}/data/data1.csv 2>&1
 	$(info $(M) Generated data/data.csv)
 	$Q mdb-export -Q -d '|' ./data/HS-toys.mdb ${table_swatch_2} > ${current_dir}/data/data2.csv 2>&1
 	$(info $(M) Generated data/data2.csv)

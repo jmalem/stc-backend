@@ -84,3 +84,9 @@ heroku container:push web
 heroku container:release web
 heroku ps:scale web=1
 ```
+
+
+### Script to clean mdb-tools warning
+```
+sed 'N;s/\(.*\)warning.*pg=23\n\(.*\)/\1\2/;P;$d;D;'
+```
