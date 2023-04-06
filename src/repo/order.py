@@ -148,9 +148,9 @@ class Order:
             else:
                 if created_by is not None:
                     if cond is None:
-                        cond = Attr('createdBy').contains(created_by)
+                        cond = (Attr('createdBy').contains(created_by) | Attr('createdBy').contains(created_by.title()))
                     else:
-                        cond = cond & Attr('createdBy').contains(created_by)
+                        cond = cond & (Attr('createdBy').contains(created_by) | Attr('createdBy').contains(created_by.title()))
 
             cond_kwargs = {}
             if cond:
