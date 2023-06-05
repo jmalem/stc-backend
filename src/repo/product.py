@@ -102,8 +102,12 @@ class Product:
             chain = None
             search = filters.get(SEARCH)
             if search:
+                keywords = search.split(' ')
+                base = r'{}'
+                expr = '(?=.*{})'
+                search_reg = base.format(''.join(expr.format(w) for w in keywords))
                 chain = (df['displayId'].str.contains(search, na=False, case=False)
-                         | df['title'].str.contains(search, na=False, case=False))
+                         | df['title'].str.contains(search_reg, na=False, case=False))
 
             category = filters.get(CATEGORY)
             if category:
