@@ -4,10 +4,11 @@ import os
 from flask import Flask
 from flask_restful import Api
 from src.service import Signup, Login, Product, ProductBuild, ProductDetail, Order as OrderSvc, Ping, Customer, \
-    CustomerBuild
+    CustomerBuild, Cart as CartSvc
 from dotenv import load_dotenv
 from src.repo.user import User
 from src.repo.order import Order
+from src.repo.cart import Cart
 from src.repo.product import Product as ProductRepo
 from src.repo.customer import Customer as CustomerRepo
 from flask_cors import CORS
@@ -20,6 +21,7 @@ AWS_TABLE_REGION = os.getenv('AWS_TABLE_REGION')
 
 USER_DB_NAME = "stc-user"
 ORDER_DB_NAME = "stc-order"
+CART_DB_NAME = "stc-cart"
 
 # TODO: create .env file with your credentials
 session = boto3.Session(
@@ -60,6 +62,13 @@ def init_repo():
         order_db.create_table(ORDER_DB_NAME)
         print(f"\nCreated table {order_db.table.name}.")
 
+    cart_db = Cart(dynamodb)
+    cart_db_exists = cart_db.exists(CART_DB_NAME)
+    if not cart_db_exists:
+        print(f"\nCreating table {CART_DB_NAME}...")
+        cart_db.create_table(CART_DB_NAME)
+        print(f"\nCreated table {cart_db.table.name}.")
+
     print(order_db.list_tables())
 
     # Init s3 session, and pass it to product repo
@@ -98,8 +107,10 @@ def init_repo():
                      resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(ProductBuild, '/product:build', resource_class_kwargs={'repo': product_db, 'user_repo': user_db})
     api.add_resource(OrderSvc, '/order', resource_class_kwargs={'repo': order_db, 'user_repo': user_db})
+    api.add_resource(CartSvc, '/cart', resource_class_kwargs={'repo': cart_db, 'user_repo': user_db})
     api.add_resource(Customer, '/customer', resource_class_kwargs={'repo': customer_db, 'user_repo': user_db})
-    api.add_resource(CustomerBuild, '/customer:build', resource_class_kwargs={'repo': customer_db, 'user_repo': user_db})
+    api.add_resource(CustomerBuild, '/customer:build',
+                     resource_class_kwargs={'repo': customer_db, 'user_repo': user_db})
 
 
 if __name__ == '__main__':

@@ -7,3 +7,4 @@ from .product_detail import ProductDetail
 from .ping import Ping
 from .customer import Customer
 from .customer_build import CustomerBuild
+from .cart import Cart
