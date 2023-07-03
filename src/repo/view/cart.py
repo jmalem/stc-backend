@@ -8,6 +8,9 @@ def from_req_2_model_cart(dt):
         dt.get('username', ""),
         from_req_2_model_order_item_array(dt.get('orderItems', [])),
         dt.get('notes', ""),
+        dt.get('discountRp', 0),
+        dt.get('discountPercent', 0),
+        dt.get('customer', ""),
     )
 
 
