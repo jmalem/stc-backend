@@ -206,7 +206,9 @@ def dataframe_aggregation(df):
     df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
 
     # Generates imageUrl in cloudfront (not always available)
-    df['imageUrl'] = df.apply(create_encoded_url, axis=1)
+    # TODO: Bring back create_encoded_url()
+    df['imageUrl'] = df.apply(
+        lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
 
     # Extract packing and unit from PACKING
     df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
@@ -215,6 +217,7 @@ def dataframe_aggregation(df):
     # drop unwanted column
     df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
     return df
+
 
 # create base64 encoded url to access image through serverless image handler
 def create_encoded_url(item):
