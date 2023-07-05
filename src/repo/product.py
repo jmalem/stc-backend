@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import re
 from enum import Enum
 import urllib
+import json
+import base64
 
 # define const
 load_dotenv()
@@ -54,8 +56,8 @@ class Product:
     def __init__(self, s3):
         self.table = None
         self.s3 = s3
-        self.df = None # data frame for swatch 1,2,3
-        self.df_user = None # data frame only for swatch 1
+        self.df = None  # data frame for swatch 1,2,3
+        self.df_user = None  # data frame only for swatch 1
         self.img_cache = dict()
 
     def init(self):
@@ -204,8 +206,7 @@ def dataframe_aggregation(df):
     df['unitPrice'] = df.apply(lambda x: getPrice(x['HARGA']), axis=1)
 
     # Generates imageUrl in cloudfront (not always available)
-    df['imageUrl'] = df.apply(
-        lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1)
+    df['imageUrl'] = df.apply(create_encoded_url, axis=1)
 
     # Extract packing and unit from PACKING
     df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
@@ -214,3 +215,20 @@ def dataframe_aggregation(df):
     # drop unwanted column
     df.drop(['HARGA', 'PACKING'], axis=1, inplace=True)
     return df
+
+# create base64 encoded url to access image through serverless image handler
+def create_encoded_url(item):
+    item_key = urllib.parse.quote(str(item['itemId'])) + IMAGE_JPG
+    item_json = {
+        "bucket": S3_IMAGE_BUCKET_NAME,
+        "key": item_key,
+        "edits": {
+            "resize": {
+                "width": 200,
+                "height": 200,
+                "fit": "contain"
+            }
+        }
+    }
+    jsonStr = json.dumps(item_json)
+    return CLOUDFRONT_BASE_URL + base64.b64encode(jsonStr.encode()).decode()
