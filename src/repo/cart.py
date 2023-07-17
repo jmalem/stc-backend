@@ -87,12 +87,14 @@ class Cart:
                     'metadata': 'cart'
                 },
             )
+            result = response.get('Item', None)
+            if result:
+                return result
+            raise NotFoundError('Not found')
         except ClientError as err:
             if err.response['Error']['Code'] == 'ResourceNotFoundException':
                 raise NotFoundError('Not found')
             raise InternalError
-        else:
-            return response['Item']
 
     def create_cart(self, cart: CartModel):
         try:
@@ -121,7 +123,7 @@ class Cart:
             )
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
-                raise NotUniqueError('Not unique')
+                raise NotFoundError('Not found')
             raise InternalError
         else:
             return json_result
