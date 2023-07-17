@@ -22,9 +22,9 @@ class Cart:
     def validate(self):
         if self.username == '':
             raise InvalidArgumentError('invalid username')
-        if self.discountRp and self.discountRp < 0:
+        if self.getDiscountRp() and self.getDiscountRp() < 0:
             raise InvalidArgumentError('invalid discountRp - must be at least zero')
-        if self.discountPercent and self.discountPercent < 0:
+        if self.getDiscountPercent() and self.getDiscountPercent() < 0:
             raise InvalidArgumentError('invalid discountPercent - must be at least zero')
 
         for order_item in self.orderItems:

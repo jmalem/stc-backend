@@ -92,7 +92,6 @@ class Cart:
                 raise NotFoundError('Not found')
             raise InternalError
         else:
-            del response['Item']['metadata']
             return response['Item']
 
     def create_cart(self, cart: CartModel):
@@ -104,7 +103,6 @@ class Cart:
                 ConditionExpression="attribute_not_exists(username) AND attribute_not_exists(metadata)",
                 ReturnValues='ALL_OLD'
             )
-            del json_result['metadata']
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotUniqueError('Not unique')
@@ -121,7 +119,6 @@ class Cart:
                 ConditionExpression="attribute_exists(username) AND attribute_exists(metadata)",
                 ReturnValues='NONE'
             )
-            del json_result['metadata']
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotUniqueError('Not unique')

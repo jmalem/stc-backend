@@ -8,8 +8,8 @@ def from_req_2_model_cart(dt):
         dt.get('username', ""),
         from_req_2_model_order_item_array(dt.get('orderItems', [])),
         dt.get('notes', ""),
-        dt.get('discountRp', 0),
-        dt.get('discountPercent', 0),
+        int(dt.get('discountRp', 0)),
+        int(dt.get('discountPercent', 0)),
         dt.get('customer', ""),
     )
 
@@ -28,8 +28,8 @@ def from_req_2_model_order_item(dt):
         from_req_2_model_item(dt.get('item')),
         dt.get('cartonQty'),
         dt.get('unitQty'),
-        dt.get('discountRp', 0),
-        dt.get('discountPercent', 0),
+        int(dt.get('discountRp', 0)),
+        int(dt.get('discountPercent', 0)),
         dt.get('notes', ""),
     )
 

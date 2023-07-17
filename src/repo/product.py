@@ -207,7 +207,9 @@ def dataframe_aggregation(df):
 
     # Generates imageUrl in cloudfront (not always available)
     # TODO: Bring back create_encoded_url()
-    df['imageUrl'] = df.apply(create_encoded_url, axis=1)
+    # df['imageUrl'] = df.apply(create_encoded_url, axis=1)
+    df['imageUrl'] = df.apply(
+        lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1) # TODO: comment out this one
 
     # Extract packing and unit from PACKING
     df[['packing', 'unit']] = df.apply(lambda x: pd.Series(
