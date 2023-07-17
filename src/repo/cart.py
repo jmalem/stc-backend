@@ -79,6 +79,7 @@ class Cart:
         else:
             return tables
 
+    # will never return undefined
     def get_cart(self, username):
         try:
             response = self.table.get_item(
@@ -88,12 +89,12 @@ class Cart:
                 },
             )
             result = response.get('Item', None)
-            if result:
-                return result
-            raise NotFoundError('Not found')
+            if result is None:
+                result = self.create_cart(CartModel(username, [], "", 0, 0, ""))
+            return result
+
         except ClientError as err:
-            if err.response['Error']['Code'] == 'ResourceNotFoundException':
-                raise NotFoundError('Not found')
+            logger.error("couldnt get cart. Here's why: %s", err)
             raise InternalError
 
     def create_cart(self, cart: CartModel):
@@ -108,6 +109,7 @@ class Cart:
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotUniqueError('Not unique')
+            logger.error("couldnt create cart. Here's why: %s", err)
             raise InternalError
         else:
             return json_result
@@ -124,6 +126,7 @@ class Cart:
         except ClientError as err:
             if err.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 raise NotFoundError('Not found')
+            logger.error("couldnt update cart. Here's why: %s", err)
             raise InternalError
         else:
             return json_result

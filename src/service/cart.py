@@ -14,33 +14,6 @@ class Cart(Resource):
         self.user_repo = user_repo
 
     @token_required
-    def post(self):
-        try:
-            data = request.get_json(force=True)
-            if data is None:
-                raise InvalidArgumentError('Missing body')
-
-            cart = view.from_req_2_model_cart(data)
-            cart.username = get_username(request.headers)
-            cart.validate()
-
-            result = self.repo.create_cart(cart)
-
-            return make_response(jsonify({
-                'success': True,
-                'data': result
-            }), 200)
-        except UnauthenticatedError as e:
-            logging.error('Failed to create cart ', e)
-            abort(401, e)
-        except InvalidArgumentError as e:
-            logging.error('Failed to create cart ', e)
-            abort(400, e)
-        except InternalError as e:
-            logging.error('Failed to create cart ', e)
-            abort(500, e)
-
-    @token_required
     def put(self):
         try:
             data = request.get_json(force=True)
