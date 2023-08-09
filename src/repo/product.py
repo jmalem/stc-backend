@@ -221,7 +221,7 @@ def dataframe_aggregation(df):
 
 # create base64 encoded url to access image through serverless image handler
 def create_encoded_url(item):
-    item_key = urllib.parse.quote(str(item['itemId'])) + IMAGE_JPG
+    item_key = str(item['itemId']) + IMAGE_JPG
     item_json = {
         "bucket": S3_IMAGE_BUCKET_NAME,
         "key": item_key,
