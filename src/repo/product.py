@@ -14,6 +14,11 @@ import base64
 load_dotenv()
 CLOUDFRONT_BASE_URL = os.getenv('AWS_CDN_URL')
 IMAGE_JPG = '.jpg'
+IMAGE_JPG_1 = '.JPG'
+IMAGE_JPEG = '.jpeg'
+IMAGE_JPEG_1 = '.JPEG'
+ALTERNATE_EXT = [IMAGE_JPG_1, IMAGE_JPEG, IMAGE_JPEG_1]
+
 S3_BUCKET_NAME = 'stc-repo-prod'
 S3_IMAGE_BUCKET_NAME = 'stc-images-prod'
 S3_KEY = 'HS-toys.mdb'
@@ -207,6 +212,7 @@ def dataframe_aggregation(df):
 
     # Generates imageUrl in cloudfront (not always available)
     df['imageUrl'] = df.apply(create_encoded_url, axis=1)
+    df['alternateImageUrls'] = df.apply(create_alternate_encoded_url, axis=1)
     # df['imageUrl'] = df.apply(
     #     lambda x: CLOUDFRONT_BASE_URL + urllib.parse.quote(str(x['itemId'])) + IMAGE_JPG, axis=1) # TODO: comment out this one
 
@@ -234,3 +240,26 @@ def create_encoded_url(item):
     }
     jsonStr = json.dumps(item_json)
     return CLOUDFRONT_BASE_URL + base64.b64encode(jsonStr.encode()).decode()
+
+
+def create_alternate_encoded_url(item):
+    res = []
+    for ext in ALTERNATE_EXT:
+        item_key = str(item['itemId']) + ext
+        item_json = {
+            "bucket": S3_IMAGE_BUCKET_NAME,
+            "key": item_key,
+            "edits": {
+                "resize": {
+                    "width": 400,
+                    "fit": "contain"
+                }
+            }
+        }
+        jsonStr = json.dumps(item_json)
+        res.append(CLOUDFRONT_BASE_URL + base64.b64encode(jsonStr.encode()).decode())
+    return res
+
+# 1. try the imageUrl
+# 2. if imageUrl fail, craft a new json (pake itemId) with .JPG/.JPEG/.jpeg and then encode it
+# 3. use that in place of the old imageUrl
