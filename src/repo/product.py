@@ -173,10 +173,17 @@ class Product:
                 )
 
                 contents = objs.get('Contents', [])
+                is_default_image_found = False
                 for c in contents:
+                    if c.get('Key') == item_id:
+                        is_default_image_found = True
                     url = CLOUDFRONT_BASE_URL + c.get('Key')
                     medias.append(url)
-                self.img_cache[item_id] = medias
+                # this is to prevent
+                # default image Y8026-20181-2-WB
+                # but shows Y8026-20181-2-WB-F only
+                if is_default_image_found:
+                    self.img_cache[item_id] = medias
             else:
                 print('cache found for ', item_id)
 
