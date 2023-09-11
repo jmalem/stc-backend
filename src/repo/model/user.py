@@ -19,9 +19,9 @@ class User:
         if self.password == '':
             raise InvalidArgumentError('password cannot be empty')
 
-        if len(self.password) <= 8:
+        if len(self.password) < 8:
             raise InvalidArgumentError(
-                'password must be longer than 8 characters')
+                'password must be at least 8 characters')
 
     def validate(self):
         self.validate_login()
