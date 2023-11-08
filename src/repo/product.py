@@ -13,6 +13,7 @@ import base64
 # define const
 load_dotenv()
 CLOUDFRONT_BASE_URL = os.getenv('AWS_CDN_URL')
+CLOUDFRONT_BACKUP_BASE_URL = os.getenv('AWS_BACKUP_CDN_URL')
 IMAGE_JPG = '.jpg'
 IMAGE_JPG_1 = '.JPG'
 IMAGE_JPEG = '.jpeg'
@@ -174,7 +175,10 @@ class Product:
 
                 contents = objs.get('Contents', [])
                 for c in contents:
-                    url = CLOUDFRONT_BASE_URL + c.get('Key')
+                    key = c.get('Key')
+                    url = CLOUDFRONT_BASE_URL + key
+                    if ".mp4" in key:
+                        url = CLOUDFRONT_BACKUP_BASE_URL + key
                     medias.append(url)
                 self.img_cache[item_id] = medias
             else:
