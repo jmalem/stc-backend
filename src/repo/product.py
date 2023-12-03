@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import re
 from enum import Enum
 import urllib
+from cachetools import TTLCache
 import json
 import base64
 
@@ -64,7 +65,7 @@ class Product:
         self.s3 = s3
         self.df = None  # data frame for swatch 1,2,3
         self.df_user = None  # data frame only for swatch 1
-        self.img_cache = dict()
+        self.img_cache = TTLCache(maxsize=100, ttl=1800)
 
     def init(self):
         """
@@ -166,6 +167,7 @@ class Product:
                 df.drop(['unitPrice'], axis=1, inplace=True)
             medias = self.img_cache.get(item_id, [])
             if len(medias) == 0:
+                print('no cache found for ', item_id, ', add cache')
                 objs = self.s3.meta.client.list_objects_v2(
                     Bucket=S3_IMAGE_BUCKET_NAME,
                     Prefix=item_id,
@@ -264,6 +266,7 @@ def create_alternate_encoded_url(item):
         res.append(CLOUDFRONT_BASE_URL + base64.b64encode(jsonStr.encode()).decode())
     return res
 
+# How the url works in FE
 # 1. try the imageUrl
 # 2. if imageUrl fail, craft a new json (pake itemId) with .JPG/.JPEG/.jpeg and then encode it
 # 3. use that in place of the old imageUrl
